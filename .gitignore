@@ -1,0 +1,12 @@
+.env
+*.pyc
+*.warc
+*.warc.gz
+.DS_Store
+chromadb/
+warcs/
+visualizations/
+test.py
+TODO.md
+runs/
+_*/

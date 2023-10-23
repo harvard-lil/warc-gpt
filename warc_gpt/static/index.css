@@ -1,0 +1,396 @@
+:root {
+  --font-family: 'Helvetica Neue', Helvetica, Arial, Sans-serif;
+  --font-family-alt: Georgia, Times, "Times New Roman", serif;  
+  --background: #F7F6F2;
+  --background-: #e2e2e2;
+ 
+  --color: #002229;
+  --color-: #04313a;
+  --color--: #06525f;
+
+  --primary: #FF3B3B;
+  --primary-: #fb9494;
+  --primary--: #ffb8b8;
+}
+
+* {
+  padding: 0px;
+  margin: 0px;
+  box-sizing: border-box;
+  outline-color: var(--primary-);
+}
+
+html {
+  color: var(--color);
+  font-size: 16px;
+  font-family: var(--font-family);
+  font-weight: normal;
+  background-color: var(--background);
+}
+
+body {
+}
+
+/*------------------------------------------------------------------------------
+ * Forms (generic)
+ -----------------------------------------------------------------------------*/
+label {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-weight: normal;
+}
+
+select, input[type="text"], input[type="number"], textarea {
+  display: block;
+  width: 100%;
+  padding: 0.45rem;
+  font-size: 0.85rem;
+  border: 1px solid var(--color--);
+  border-radius: 0.25rem;
+  margin-bottom: 0.65rem;
+  -moz-appearance: none; 
+  -webkit-appearance: none; 
+  appearance: none;
+  font-family: var(--font-family);
+}
+
+textarea {
+  font-size: 1rem;
+  padding: 0.65rem;
+  resize: none;
+}
+
+select {
+	background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23121212%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E');
+	background-repeat: no-repeat, repeat;
+	background-position: right .7em top 50%, 0 0;
+	background-size: .65em auto, 100%;
+}
+
+button {
+  background-color: var(--color);
+  color: var(--background);
+  font-family: var(--font-family);
+  font-weight: normal;
+  padding: 0.75rem;
+  font-size: 1rem;
+  border-radius: 0.5rem;
+  border: 0px;
+  transition: all 0.25s ease-in-out;
+  cursor: pointer;
+}
+
+button span {
+  font-weight: bold;
+}
+
+button:not(:disabled):hover {
+  text-decoration: underline;
+}
+
+button:disabled {
+  background-color: var(--color--);
+  cursor: not-allowed;
+}
+
+
+/*------------------------------------------------------------------------------
+ * Dialog (generic)
+ -----------------------------------------------------------------------------*/
+dialog {
+  width: 85ch;
+  max-width: 90%;
+  max-height: 80vh;
+  margin: auto;
+  border: 0px;
+  border-radius: 0.5rem;
+  padding: 2rem;
+  background-color: var(--color);
+  color: var(--background);
+  border: 1px solid var(--color--);
+}
+
+/* "Close" button */
+dialog button.close {
+  position: absolute;
+  top: 2.15rem;
+  right: 1.5rem;
+  z-index: 2;
+  background-color: transparent;
+  color: var(--background);
+  text-decoration: underline;
+}
+
+dialog button.close:hover {
+  text-decoration: none;
+}
+
+dialog::backdrop {
+  background-color: rgba(0, 0, 0, 0.65);
+}
+
+dialog h2 {
+  position: relative;
+  top: 0.45rem;
+}
+
+dialog h3 {
+  border-top: 1px solid var(--color--);
+  padding-top: 1.5rem;
+  margin-bottom: 1.5rem;
+  font-weight: normal;
+}
+
+dialog h3:first-of-type {
+  margin-top: 2rem;
+}
+
+dialog ul {
+  list-style-position: inside;
+}
+
+dialog ul li {
+  margin-bottom: 0.5rem;
+}
+
+dialog a {
+  color: var(--primary-);
+  text-decoration: none;
+}
+
+dialog a:hover {
+  text-decoration: underline;
+}
+
+dialog table {
+  margin-bottom: 1rem;
+}
+
+dialog table tr {
+  vertical-align: top;
+}
+
+dialog table tr td:first-of-type {
+  min-width: 15ch;
+}
+
+dialog table tr td:last-of-type {
+  word-break: break-all;
+}
+
+dialog table tr td {
+  padding-bottom: 0.5rem;
+}
+
+dialog textarea {
+  height: 10rem;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  background-color: var(--background-);
+  color: var(--color);
+  font-family: var(--font-family-alt);
+  line-height: 1.5rem;
+}
+
+/*------------------------------------------------------------------------------
+ * Layout
+ -----------------------------------------------------------------------------*/
+main {
+  display: grid;
+  grid-template-columns: 20rem 1fr;
+  grid-template-rows: 1fr;
+  grid-column-gap: 0px;
+  grid-row-gap: 0px;
+  min-height: 100vh;
+}
+
+h2 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  font-weight: normal;
+}
+
+@media (max-width: 759px) {
+  main {
+    display: block;
+  }
+}
+
+/*------------------------------------------------------------------------------
+ * Sidebar
+ -----------------------------------------------------------------------------*/
+main > #settings { 
+  grid-area: 1 / 1 / 2 / 2;
+  background-color: var(--color);
+  color: var(--background);
+  padding: 1.5rem;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;  
+}
+
+main > #settings #logo-main {
+  display: block;
+  max-width: 100%;
+  padding: 1rem;
+  padding-top: 0rem;
+  padding-bottom: 0rem;
+  margin-bottom: 1.5rem;
+}
+
+@media (max-width: 759px) {
+  main > #settings #logo-main {
+    max-width: 60%;
+    margin: auto;
+    margin-bottom: 1rem;
+  }
+}
+
+main > #settings #logo-lil {
+  display: block;
+  margin: auto;
+  max-width: 100%;
+  filter: invert();
+}
+
+@media (max-width: 759px) {
+  main > #settings #logo-lil {
+    max-width: 65%;
+    margin: auto;
+  }
+}
+
+main > #settings button.rag_prompt_override {
+  background-color: transparent;
+  display: block;
+  width: 100%;
+  text-align: left;
+  text-decoration: underline;
+  padding-left: 0px;
+}
+
+main > #settings button.rag_prompt_override:hover {
+  text-decoration: none;
+}
+
+dialog.rag_prompt_override textarea {
+  min-height: 15rem;
+}
+
+/*------------------------------------------------------------------------------
+ * Chat UI
+ -----------------------------------------------------------------------------*/
+main > #chat { 
+  grid-area: 1 / 2 / 2 / 3; 
+  padding: 1.5rem;
+  padding-top: 2rem;
+  display: flex;
+  flex-direction: column;
+  overflow-x: scroll;
+  max-width: 85ch;
+}
+
+main > #chat #chat-ui {
+  flex: 1;
+  overflow-y: scroll;
+  max-height: calc(95vh - 11rem);
+  min-height: calc(95vh - 11rem);
+  margin-bottom: 1rem;
+}
+
+@media (max-width: 759px) {
+  main > #chat #chat-ui {
+    max-height: 55vh;
+    min-height: 55vh;
+  }
+}
+
+main > #chat #chat-ui .message {
+  width: 90%;
+  background-color: var(--background-);
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  border-radius: 0.5rem;
+}
+
+main > #chat #chat-ui .message.user {
+  font-family: var(--font-family-alt);
+  line-height: 1.5rem;
+}
+
+main > #chat #chat-ui .message.ai {
+  margin-left: auto;
+  background-color: var(--color);
+  color: var(--background);
+  margin-bottom: 1rem;
+}
+
+main > #chat #chat-ui .message.ai .model {
+  /*font-family: var(--font-family-alt);*/
+  color: var(--primary-);
+}
+
+main > #chat #chat-ui .message.ai .response {
+  line-height: 1.35rem;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  font-family: var(--font-family-alt);
+  line-height: 1.5rem;
+}
+
+main > #chat #chat-ui .message.ai .actions {
+  text-align: right;
+  margin-bottom: 1.5rem;
+}
+
+main > #chat #chat-ui .actions {
+  text-align: right;
+  margin-bottom: 1.5rem;
+}
+
+main > #chat #chat-ui .actions button {
+  background-color: unset;
+  color: var(--color);
+  padding-top: 0px;
+  padding-bottom: 0px;
+  text-decoration: underline;
+  transition-duration: 0.15s;
+}
+
+main > #chat #chat-ui .actions button:hover {
+  text-decoration: none;
+}
+
+main > #chat #chat-ui .actions button:active {
+  opacity: 0.75;
+}
+
+main > #chat #chat-ui .actions button.show-sources {
+}
+
+main > #chat #chat-input {
+  flex: 0.5;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+main > #chat #chat-input textarea {
+  height: 5rem;
+  font-family: var(--font-family-alt);
+  line-height: 1.5rem;
+  border-bottom-right-radius: 0px;
+}
+
+main > #chat #chat-input button {
+  display: inline-block;
+  width: 20ch;
+  position: relative;
+  top: -0.725rem;
+  border-top-left-radius: 0px;
+  border-top-right-radius: 0px;
+  margin-left: auto;
+}
+
