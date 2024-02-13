@@ -289,7 +289,18 @@ chatInput.addEventListener("submit", async (e) => {
     messageInput.value = "";
 
   } catch(err) {
-    messageInput.value = sanitizeString(message, false); // Put unprocessed message back in textarea
+    // Put unprocessed message back in textarea
+    messageInput.value = sanitizeString(message, false);
+
+    // Show error message
+    chatUI.insertAdjacentHTML("beforeend", 
+      /*html*/`
+      <article class="message ai errror">
+      <p class="model">Error</p>
+      <p class="response">An error occurred while processing the request.</p>
+      </article>`    
+    );
+
     throw(err);
   } finally {
     messageInput.removeAttribute("disabled");

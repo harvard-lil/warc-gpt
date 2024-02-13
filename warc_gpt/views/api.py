@@ -15,6 +15,13 @@ from warc_gpt.utils import list_available_models
 
 litellm.telemetry = False
 
+vector_store_cache = {
+    "chroma_client": None,
+    "embedding_model": None,
+    "chroma_collection": None,
+}
+""" Module-level "caching" for vector store connection. """
+
 
 @current_app.route("/api/models")
 def get_models():
@@ -153,59 +160,55 @@ def post_completion():
             )
 
     #
-    # Retrieve context - unless in no_rag mode
+    # Load vector store (from "cache" if available)
     #
-
-    # Load vector store client and collection
-    # Shared at app-level through:
-    # - g.chroma_client
-    # - g.chroma_collection
     try:
-        assert not no_rag
-
-        if "chroma_client" in g:
-            chroma_client = g.chroma_client
+        if vector_store_cache.get("embedding_model", None) is None:
+            embedding_model = SentenceTransformer(
+                model_name_or_path=environ["VECTOR_SEARCH_SENTENCE_TRANSFORMER_MODEL"],
+                device=environ["VECTOR_SEARCH_SENTENCE_TRANSFORMER_DEVICE"],
+            )
+            vector_store_cache["embedding_model"] = embedding_model
         else:
+            embedding_model = vector_store_cache["embedding_model"]
+
+        assert embedding_model
+    except Exception:
+        current_app.logger.error(traceback.format_exc())
+        return jsonify({"error": "Could not load embedding model."}), 500
+
+    try:
+        if vector_store_cache.get("chroma_client", None) is None:
             chroma_client = chromadb.PersistentClient(
                 path=environ["VECTOR_SEARCH_PATH"],
                 settings=chromadb.Settings(anonymized_telemetry=False),
             )
-
-            g.chroma_client = chroma_client
-
-        if "chroma_collection" in g:
-            chroma_collection = g.chroma_collection
+            vector_store_cache["chroma_client"] = chroma_client
         else:
-            chroma_collection = chroma_client.get_collection(
-                name=environ["VECTOR_SEARCH_COLLECTION_NAME"]
-            )
+            chroma_client = vector_store_cache["chroma_client"]
 
-            g.chroma_collection = chroma_collection
-
-    except AssertionError:
-        pass  # no_rag mode
+        assert chroma_client
     except Exception:
         current_app.logger.error(traceback.format_exc())
-        return jsonify({"error": "Could not load vector store."}), 500
+        return jsonify({"error": "Could not load ChromaDB client."}), 500
 
-    # Load embedding model (Shared at app-level via g.embedding_model)
     try:
-        assert not no_rag
-
-        if "embedding_model" in g:
-            embedding_model = g.embedding_model
-        else:
-            embedding_model = SentenceTransformer(
-                environ["VECTOR_SEARCH_SENTENCE_TRANSFORMER_MODEL"],
-                device=environ["VECTOR_SEARCH_SENTENCE_TRANSFORMER_DEVICE"],
+        if vector_store_cache.get("chroma_collection", None) is None:
+            chroma_collection = chroma_client.get_collection(
+                name=os.environ["VECTOR_SEARCH_COLLECTION_NAME"],
             )
+            vector_store_cache["chroma_collection"] = chroma_collection
+        else:
+            chroma_collection = vector_store_cache["chroma_collection"]
 
-            g.embedding_model = embedding_model
-    except AssertionError:
-        pass  # no_rag mode
+        assert chroma_collection
     except Exception:
         current_app.logger.error(traceback.format_exc())
-        return jsonify({"error": "Could not load embedding model."}), 500
+        return jsonify({"error": "Could not load ChromaDB collection."}), 500
+
+    #
+    # Retrieve context - unless in no_rag mode
+    #
 
     # Retrieve context chunks
     try:
