@@ -1,6 +1,7 @@
 """
 `commands.ingest` module: Controller for the `ingest` CLI command.
 """
+
 import os
 import glob
 import traceback
@@ -11,7 +12,7 @@ import click
 import chromadb
 from bs4 import BeautifulSoup
 from bs4 import Comment as HTMLComment
-from PyPDF2 import PdfReader
+from pypdf import PdfReader
 from sentence_transformers import SentenceTransformer
 from warcio.archiveiterator import ArchiveIterator
 from langchain.text_splitter import SentenceTransformersTokenTextSplitter
@@ -97,6 +98,10 @@ def ingest() -> None:
                 # Extract metadata
                 rec_headers = record.rec_headers
                 http_headers = record.http_headers
+
+                if not rec_headers or not http_headers:
+                    continue
+
                 record_data["warc_filename"] = os.path.basename(warc_file)
                 record_data["warc_record_id"] = rec_headers.get_header("WARC-Record-ID")
                 record_data["warc_record_date"] = rec_headers.get_header("WARC-Date")
