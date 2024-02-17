@@ -50,26 +50,6 @@ const sanitizeString = (string, convertLineBreaks = true) => {
   return string;
 }
 
-/**
- * Automatically activate / deactivate "Ask WARC GPT" button.
- * Runs every 100ms.
- */
-setInterval(() => {
-  const messageOk = messageInput.value.trim().length > 0;
-  const modelOk = modelSelect.value.trim().length > 0;
-  const temperatureOk = temperatureSelect.value.match(/[0-9]\.[0-9]/) != null;
-  const maxTokensOk = maxTokensInput.value === "" || maxTokensInput.value.match(/[0-9]+/) != null;
-  const noRagOk = ["true", "false"].includes(noRagSelect.value);
-  const noHistoryOk = ["true", "false"].includes(noHistorySelect.value);
-
-  // Activate "Ask" button if all is OK
-  if (!isLoading && messageOk && modelOk && temperatureOk && maxTokensOk && noRagOk && noHistoryOk) {
-    askButton.removeAttribute("disabled");
-  } else {
-    askButton.setAttribute("disabled", "disabled");
-  }
-}, 100);
-
 
 /*------------------------------------------------------------------------------
  * Chat Mechanism
@@ -84,7 +64,7 @@ setInterval(() => {
 chatInput.addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  // Assemble payload
+  // Assemble completion payload
   const message = messageInput.value.trim();
   const model = modelSelect.value.trim();
   const temperature = parseFloat(temperatureSelect.value).toFixed(1);
@@ -121,7 +101,7 @@ chatInput.addEventListener("submit", async (e) => {
   });
 
   //
-  // Set app in loading state
+  // Raise loading state
   //
   isLoading = true;
   askButton.setAttribute("disabled", "disabled");
@@ -139,12 +119,12 @@ chatInput.addEventListener("submit", async (e) => {
     })
 
     const data = await response.json();
-    
     console.log(data);
+    
     history = data.history;
     exchanges[data.id_exchange] = data;
 
-    // data-id-exchange="${data.id_exchange}" short cut
+    // data-id-exchange="${data.id_exchange}" shortcut
     const dataAttr = `data-id-exchange="${data.id_exchange}"`;
 
     //
@@ -280,12 +260,12 @@ chatInput.addEventListener("submit", async (e) => {
 
     // Scroll just enough to reveal new message
     chatUI.scroll({
-      top: chatUI.scrollTop + 50, 
+      top: chatUI.scrollTop + 75, 
       left: 0, 
       behavior: "smooth"
     });
 
-    // Restore message textarea's default state
+    // Clear chat input so placeholder shows
     messageInput.value = "";
 
   } catch(err) {
@@ -307,6 +287,26 @@ chatInput.addEventListener("submit", async (e) => {
     isLoading = false;
   }
 });
+
+/**
+ * Automatically activate / deactivate "Ask WARC GPT" button.
+ * Runs every 100ms.
+ */
+setInterval(() => {
+  const messageOk = messageInput.value.trim().length > 0;
+  const modelOk = modelSelect.value.trim().length > 0;
+  const temperatureOk = temperatureSelect.value.match(/[0-9]\.[0-9]/) != null;
+  const maxTokensOk = maxTokensInput.value === "" || maxTokensInput.value.match(/[0-9]+/) != null;
+  const noRagOk = ["true", "false"].includes(noRagSelect.value);
+  const noHistoryOk = ["true", "false"].includes(noHistorySelect.value);
+
+  // Activate "Ask" button if all is OK
+  if (!isLoading && messageOk && modelOk && temperatureOk && maxTokensOk && noRagOk && noHistoryOk) {
+    askButton.removeAttribute("disabled");
+  } else {
+    askButton.setAttribute("disabled", "disabled");
+  }
+}, 100);
 
 
 /*------------------------------------------------------------------------------
