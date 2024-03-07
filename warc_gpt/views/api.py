@@ -2,14 +2,15 @@
 `views.api` module: API routes controller.
 """
 
+import json
 import os
 import traceback
 import uuid
 
 import chromadb
 import litellm
+from flask import current_app, g, jsonify, request
 from sentence_transformers import SentenceTransformer
-from flask import current_app, jsonify, request, g
 
 from warc_gpt.utils import list_available_models
 
@@ -272,38 +273,45 @@ def post_completion():
             temperature=temperature,
             max_tokens=max_tokens,
             api_base=os.environ["OLLAMA_API_URL"] if model.startswith("ollama") else None,
+            stream=True
         )
 
         history.append({"content": message, "role": "user"})
 
-        history.append(
-            {
-                "content": response["choices"][0]["message"]["content"],
-                "role": "assistant",
-            }
-        )
+        # this history object will get updated as text comes back
+        history.append({"content": "", "role": "assistant"})
 
-        output = {
-            "id_exchange": str(uuid.uuid4()),
-            "response": response["choices"][0]["message"]["content"],
-            "request_info": {
-                "model": model,
-                "message": message,
-                "temperature": temperature,
-                "max_tokens": max_tokens,
-                "no_rag": no_rag,
-                "message_plus_prompt": prompt,
-            },
-            "response_info": {
-                "prompt_tokens": response["usage"]["prompt_tokens"],
-                "completion_tokens": response["usage"]["completion_tokens"],
-                "total_tokens": response["usage"]["total_tokens"],
-            },
-            "context": vector_search_results["metadatas"][0] if vector_search_results else [],
-            "history": history,
-        }
+        def generate():
+            id_exchange = str(uuid.uuid4())
 
-        return (jsonify(output), 200)
+            # first object sent includes metadata about the response
+            yield json.dumps({
+                "id_exchange": id_exchange,
+                "request_info": {
+                    "model": model,
+                    "temperature": temperature,
+                    "max_tokens": max_tokens,
+                    "no_rag": no_rag,
+                    "message_plus_prompt": prompt,
+                },
+                "context": vector_search_results["metadatas"][0] if vector_search_results else [],
+            }) + "\n"
+
+            # then we send individual messages for each part of the response
+            for chunk in response:
+                text = chunk["choices"][0]["delta"]["content"]
+                # append the latest bit of text to the last history entry
+                # note text is None when there is no more response from the llm
+                if text is not None:
+                    history[-1]["content"] += text
+
+                yield json.dumps({
+                    "id_exchange": id_exchange,
+                    "message": text,
+                    "history": history
+                }) + "\n"
+
+        return current_app.response_class(generate(), mimetype="application/jsonlines")
     except Exception:
         current_app.logger.error(traceback.format_exc())
         return jsonify({"error": "Could not query LLM."}), 500

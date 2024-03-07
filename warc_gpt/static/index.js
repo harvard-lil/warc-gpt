@@ -39,7 +39,7 @@ const askButton = document.querySelector("#ask");
  * @returns {string}
  */
 const sanitizeString = (string, convertLineBreaks = true) => {
-  string = string.trim()
+  string = string
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;");
 
@@ -108,166 +108,58 @@ chatInput.addEventListener("submit", async (e) => {
   messageInput.setAttribute("disabled", "disabled");
   messageInput.value = "Please wait ..."
 
+  let seenInitialMetadata = false;
+
   //
   // Query API and process response
   //
   try {
+
     const response = await fetch("/api/completion", {
       method: "POST",
       headers: {"content-type": "application/json"},
       body: JSON.stringify(payload)
     })
 
-    const data = await response.json();
-    console.log(data);
-    
-    history = data.history;
-    exchanges[data.id_exchange] = data;
+    // We are going to stream back JSON lines data from the API as LLM text becomes
+    // available. The first JSON object contains metadata about the request. And
+    // subsequent JSON objects contain chunks of text from the LLM.
+    const reader = response.body.getReader();
 
-    // data-id-exchange="${data.id_exchange}" shortcut
-    const dataAttr = `data-id-exchange="${data.id_exchange}"`;
+    let runningText = "";
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
 
-    //
-    // Append response to chat UI 
-    //
-    chatUI.insertAdjacentHTML("beforeend", 
-      /*html*/`
-      <article class="message ai">
-      <p class="model">${sanitizeString(data.request_info.model)}</p>
-      <p class="response">${sanitizeString(data.response)}</p>
-      </article>`    
-    );
+      const text = new TextDecoder().decode(value);
+      const lines = text.split("\n");
 
-    //
-    // Append "action" buttons to chat UI
-    //
-    if (!noRag) {
-      chatUI.insertAdjacentHTML("beforeend", 
-        /*html*/`
-        <article class="actions">
-          <button class="show-sources" ${dataAttr}>Show sources</button>
-          <button class="copy-as-json" ${dataAttr}>Copy as JSON</button>
-        </article>`
-      ); 
-    } else {
-      chatUI.insertAdjacentHTML("beforeend", 
-        /*html*/`
-        <article class="actions">
-          <button class="copy-as-json" ${dataAttr}>Copy as JSON</button>
-        </article>`
-      );
-    }
+      for (const line of lines) {
+        try {
+          runningText += line;
+          const data = JSON.parse(line);
+          runningText = "";
 
-    //
-    // Create and inject "Show Sources" dialog
-    //
-    let showSourcesDialogHTML = ""
-
-    // Add individual sources
-    for (const context of data.context) {
-      showSourcesDialogHTML += /*html*/`
-      <h3>${sanitizeString(context.warc_filename)}</h3>
-
-      <table>
-        <tr>
-          <td>URL: </td>
-          <td>
-            <a href="${sanitizeString(context.warc_record_target_uri, false)}">
-              ${sanitizeString(context.warc_record_target_uri, false)}
-            </a>
-          </td>
-        </tr>
-
-        <tr>
-          <td>Date: </td>
-          <td><span>${sanitizeString(context.warc_record_date, false)}</span></td>
-        </tr>
-
-        <tr>
-          <td>Record ID: </td>
-          <td><span>${sanitizeString(context.warc_record_id, false)}</span></td>
-        </tr>
-      </table>
-      
-      <textarea disabled>${sanitizeString(context.warc_record_text, false)}</textarea>
-      `;
-    }
-
-    // Add retrieval prompt to dialog
-    if (!noRag) {
-      showSourcesDialogHTML += /*html*/`
-        <h3>Retrieval Prompt</h3>
-        <textarea disabled>${sanitizeString(data.request_info.message_plus_prompt, false)}</textarea>
-      `;
-    }
-
-    // Add chat history to dialog
-    if (!noHistory) {
-      let historyAsText = /*html*/``;
-
-      for (const message of data.history) {
-        historyAsText += `${message.role}: ${message.content.trim()}\n`
+          if (! seenInitialMetadata) {
+            seenInitialMetadata = true;
+            addInitialResponse(data, chatUI, noHistory);
+          } else if (data.message) {
+            addResponse(data, chatUI);
+          } else if (!noHistory) {
+            addHistory(data);
+          }
+        } catch({ name, message }) {
+          // Because of buffering we may get partial JSON so we need to
+          // accumulate runningText until the JSON string parses.
+          //
+          // So, we can ignore JSON.parse errors, but any other error is a
+          // problem.
+          if (! message.match(/JSON.parse/)) {
+            throw new Error(`Error while reading from completion API: ${name} ${message}`);
+          }
+        }
       }
-
-      showSourcesDialogHTML += /*html*/`
-        <h3>Chat History</h3>
-        <textarea disabled>${sanitizeString(historyAsText, false)}</textarea>
-      `;      
     }
-
-    // Inject dialog in DOM
-    if (!noRag) {
-      chatUI.insertAdjacentHTML("beforeend", 
-        /*html*/`
-        <dialog class="show-sources" data-id-exchange="${data.id_exchange}">
-          <button class="close">Close</button>
-          <h2>Sources</h2>
-          ${showSourcesDialogHTML}
-        </dialog>`
-      );
-    }
-
-    //
-    // Create event listeners for "Show sources"
-    //
-    if (noRag !== true) {
-      const showSourcesDialog = document.querySelector(`dialog[${dataAttr}]`);
-      const showSourcesOpenButton = document.querySelector(`button.show-sources[${dataAttr}]`);
-      const showSourcesCloseButton = document.querySelector(`dialog[${dataAttr}] button.close`);
-      
-      showSourcesOpenButton.addEventListener("click", e => {
-        showSourcesDialog.showModal();
-      });
-
-      showSourcesCloseButton.addEventListener("click", e => {
-        showSourcesDialog.close();
-      });
-
-      showSourcesDialog.addEventListener("click", e => { // Backdrop click closes the dialog
-        showSourcesDialog.close();
-      });
-    }
-
-    //
-    // Create event listeners for "Copy as JSON".
-    //
-    const copyAsJSONButton = document.querySelector(`button.copy-as-json[${dataAttr}]`);
-
-    copyAsJSONButton.addEventListener("click", e => {
-      const jsonExport = JSON.stringify(exchanges[data.id_exchange]);
-      navigator.clipboard.writeText(jsonExport);
-    })
-
-    // Scroll just enough to reveal new message
-    chatUI.scroll({
-      top: chatUI.scrollTop + 75, 
-      left: 0, 
-      behavior: "smooth"
-    });
-
-    // Clear chat input so placeholder shows
-    messageInput.value = "";
-
   } catch(err) {
     // Put unprocessed message back in textarea
     messageInput.value = sanitizeString(message, false);
@@ -287,6 +179,178 @@ chatInput.addEventListener("submit", async (e) => {
     isLoading = false;
   }
 });
+
+/**
+ * Add the initial framing of the response.
+ */
+function addInitialResponse(data, chatUI, noHistory) {
+  history = data.history;
+  exchanges[data.id_exchange] = data;
+
+  // data-id-exchange="${data.id_exchange}" shortcut
+  const dataAttr = `data-id-exchange="${data.id_exchange}"`;
+
+  //
+  // Append response to chat UI 
+  //
+  chatUI.insertAdjacentHTML("beforeend", 
+    /*html*/`
+    <article id="exchange-${data.id_exchange}" class="message ai">
+    <p class="model">${sanitizeString(data.request_info.model)}</p>
+    <p class="response"></p>
+    </article>`    
+  );
+
+  //
+  // Append "action" buttons to chat UI
+  //
+  if (!data.no_rag) {
+    chatUI.insertAdjacentHTML("beforeend", 
+      /*html*/`
+      <article class="actions">
+        <button class="show-sources" ${dataAttr}>Show sources</button>
+        <button class="copy-as-json" ${dataAttr}>Copy as JSON</button>
+      </article>`
+    ); 
+  } else {
+    chatUI.insertAdjacentHTML("beforeend", 
+      /*html*/`
+      <article class="actions">
+        <button class="copy-as-json" ${dataAttr}>Copy as JSON</button>
+      </article>`
+    );
+  }
+
+  //
+  // Create and inject "Show Sources" dialog
+  //
+  let showSourcesDialogHTML = ""
+
+  // Add individual sources
+  for (const context of data.context) {
+    showSourcesDialogHTML += /*html*/`
+    <h3>${sanitizeString(context.warc_filename)}</h3>
+
+    <table>
+      <tr>
+        <td>URL: </td>
+        <td>
+          <a href="${sanitizeString(context.warc_record_target_uri, false)}">
+            ${sanitizeString(context.warc_record_target_uri, false)}
+          </a>
+        </td>
+      </tr>
+
+      <tr>
+        <td>Date: </td>
+        <td><span>${sanitizeString(context.warc_record_date, false)}</span></td>
+      </tr>
+
+      <tr>
+        <td>Record ID: </td>
+        <td><span>${sanitizeString(context.warc_record_id, false)}</span></td>
+      </tr>
+    </table>
+    
+    <textarea disabled>${sanitizeString(context.warc_record_text, false)}</textarea>
+    `;
+  }
+
+  // Add retrieval prompt to dialog
+  if (!data.no_rag) {
+    showSourcesDialogHTML += /*html*/`
+      <h3>Retrieval Prompt</h3>
+      <textarea disabled>${sanitizeString(data.request_info.message_plus_prompt, false)}</textarea>
+    `;
+  }
+
+  // Inject dialog in DOM
+  if (!data.request_info.no_rag) {
+    chatUI.insertAdjacentHTML("beforeend", 
+      /*html*/`
+      <dialog class="show-sources" data-id-exchange="${data.id_exchange}">
+        <button class="close">Close</button>
+        <h2>Sources</h2>
+        ${showSourcesDialogHTML}
+      </dialog>`
+    );
+  }
+
+  //
+  // Create event listeners for "Show sources"
+  //
+  if (!data.request_info.no_rag) {
+    const showSourcesDialog = document.querySelector(`dialog[${dataAttr}]`);
+    const showSourcesOpenButton = document.querySelector(`button.show-sources[${dataAttr}]`);
+    const showSourcesCloseButton = document.querySelector(`dialog[${dataAttr}] button.close`);
+    
+    showSourcesOpenButton.addEventListener("click", e => {
+      showSourcesDialog.showModal();
+    });
+
+    showSourcesCloseButton.addEventListener("click", e => {
+      showSourcesDialog.close();
+    });
+
+    showSourcesDialog.addEventListener("click", e => { // Backdrop click closes the dialog
+      showSourcesDialog.close();
+    });
+  }
+
+  //
+  // Create event listeners for "Copy as JSON".
+  //
+  const copyAsJSONButton = document.querySelector(`button.copy-as-json[${dataAttr}]`);
+
+  copyAsJSONButton.addEventListener("click", e => {
+    const jsonExport = JSON.stringify(exchanges[data.id_exchange]);
+    navigator.clipboard.writeText(jsonExport);
+  })
+
+  // Scroll just enough to reveal new message
+  chatUI.scroll({
+    top: chatUI.scrollTop + 75, 
+    left: 0, 
+    behavior: "smooth"
+  });
+
+  // Clear chat input so placeholder shows
+  messageInput.value = "";
+}
+
+/**
+ * Add a chunk of the response.
+ */
+function addResponse(data, chatUI) {
+  const id = data.id_exchange
+  const response = document.querySelector(`#exchange-${id} .response`);
+  response.innerHTML += sanitizeString(data.message);
+  chatUI.scroll({
+    top: chatUI.scrollHeight,
+    left: 0,
+    behavior: "smooth"
+  });
+}
+
+/**
+ * Add the chat history.
+ */
+function addHistory(data) {
+  let historyAsText = /*html*/``;
+  for (const message of data.history) {
+    historyAsText += `${message.role}: ${message.content.trim()}\n`
+  }
+
+  const dialogs = document.querySelectorAll('dialog.show-sources');
+  const dialog = dialogs[dialogs.length - 1];
+
+  dialog.innerHTML += /*html*/`
+    <h3 id="history">Chat History</h3>
+    <textarea disabled>${sanitizeString(historyAsText, false)}</textarea>
+  `;
+}
+
+
 
 /**
  * Automatically activate / deactivate "Ask WARC GPT" button.
