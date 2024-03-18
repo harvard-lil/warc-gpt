@@ -1,0 +1,31 @@
+inspect-dialog {
+  display: block;
+}
+
+inspect-dialog dialog {
+  width: 100ch;
+  height: 90dvh;
+}
+
+inspect-dialog dialog[open] {
+  display: flex;
+  flex-direction: column;
+}
+
+inspect-dialog dialog > p {
+  margin-bottom: 1rem;
+}
+
+inspect-dialog dialog #logs {
+  display: block;
+  height: auto;
+  overflow: scroll;
+  white-space: pre-line;
+  padding: 1rem;
+  line-height: 1.5rem;
+  color: var(--color);
+  background-color: var(--background);
+  font-family: 'Courier New', Courier, monospace;
+  border: 1px solid var(--color--);
+  border-radius: 0.25rem;
+}

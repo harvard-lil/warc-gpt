@@ -5,7 +5,7 @@
 More info:
 - <a href="https://lil.law.harvard.edu/blog/2024/02/12/warc-gpt-an-open-source-tool-for-exploring-web-archives-with-ai/">"WARC-GPT: An Open-Source Tool for Exploring Web Archives Using AI"</a>. Feb 12 2024 - _lil.law.harvard.edu_
 
-![](screenshots.webp)
+https://github.com/harvard-lil/warc-gpt/assets/625889/8ea3da4a-62a1-4ffa-a510-ef3e35699237
 
 
 ---
@@ -54,18 +54,21 @@ poetry install
 
 ## Configuring the application
 
-This program uses environment variables to handle settings. Copy `.env.example` into a new `.env` file and edit it as needed.
+This program uses environment variables to handle settings. 
+Copy `.env.example` into a new `.env` file and edit it as needed.
 
 ```bash
 cp .env.example .env
 ```
 
-By default, `.env` is configured: 
-- To use [intfloat/e5-large-v2](https://huggingface.co/intfloat/e5-large-v2) as an embedding model
-- To connect to a local instance of [Ollama](https://ollama.ai) for inference
-- To use a basic, fairly neutral retrieval prompt 
+See details for individual settings in [.env.example](.env.example).
 
-Edit this file as needed to adjust settings, replace the embedding model, retrieval prompt, or to connect WARC-GPT to [Open AI](https://platform.openai.com/docs/introduction), [Anthropic](https://docs.anthropic.com/claude/reference/getting-started-with-the-api), [Cohere](https://docs.cohere.com/docs) or [Perplexity AI](https://docs.perplexity.ai/).
+**A few notes:**
+- WARC-GPT can interact with both the [OpenAI API](https://platform.openai.com/docs/introduction) and [Ollama](https://ollama.ai) for local inference. 
+  - Both can be used at the same time, but at least one is needed. 
+  - By default, the program will try to communicate with Ollama's API at `http://localhost:11434`.
+  - It is also possible to use OpenAI's client to interact with compatible providers, such as [HuggingFace's Message API](https://huggingface.co/blog/tgi-messages-api) or [vLLM](https://docs.vllm.ai/en/latest/getting_started/quickstart.html#using-openai-completions-api-with-vllm). To do so, set values for both `OPENAI_BASE_URL` and `OPENAI_COMPATIBLE_MODEL` environment variables. 
+- Prompts can be edited directly in the configuration file.
 
 [☝️ Summary](#summary)
 
@@ -105,7 +108,7 @@ poetry run flask run
 
 Once the server is started, the application's web UI should be available on `http://localhost:5000`.
 
-Unless the **Disable RAG** option is turned on, the system will try to find relevant excerpts in its knowledge base - populated ahead of time using WARC files and the `ingest` command - to answer the questions it is asked.
+Unless RAG search is disabled in settings, the system will try to find relevant excerpts in its knowledge base - populated ahead of time using WARC files and the `ingest` command - to answer the questions it is asked.
 
 The interface also automatically handles a basic chat history, allowing for few-shots / chain-of-thoughts prompting. 
 
@@ -118,48 +121,45 @@ The interface also automatically handles a basic chat history, allowing for few-
 ### [GET] /api/models
 Returns a list of available models as JSON.
 
-### [POST] /api/completion
-For a given message, retrieves relevant context from the knowledge base and use an LLM to generate a text completion.
+### [POST] /api/search
+Performs search against the vector store for a given `message`.
 
 <details>
-<summary><strong>Accepts JSON body with the following properties:</strong></summary>
+<summary><strong>Accepts a JSON body with the following properties:</strong></summary>
+
+- `message`: User prompt (required)
+
+</details>
+
+<details>
+<summary><strong>Returns a JSON array of objects containing the following properties:</strong></summary>
+
+- `[].warc_filename`: Filename of the WARC from which that excerpt is from.
+- `[].warc_record_content_type`: Can start with either `text/html` or `application/pdf`.
+- `[].warc_record_id`: Individual identifier of the WARC record within the WARC file. 
+- `[].warc_record_date`: Date at which the WARC record was created. 
+- `[].warc_record_target_uri`: Filename of the WARC from which that excerpt is from.
+- `[].warc_record_text`: Text excerpt.
+
+</details>
+
+### [POST] /api/complete
+Uses an LLM to generate a text completion.
+
+<details>
+<summary><strong>Accepts a JSON body with the following properties:</strong></summary>
 
 - `model`: One of the models `/api/models` lists (required)
 - `message`: User prompt (required)
-- `temperature`: Defaults to 0.0 (required)
+- `temperature`: Defaults to 0.0
 - `max_tokens`: If provided, caps number of tokens that will be generated in response.
-- `no_rag`: If set and true, the API will not try to retrieve context.
-- `rag_prompt_override`: If provided, will be used in replacement of the predefined RAG prompt. {context} and {question} placeholders will be automatically replaced.
-- `history`: A list of chat completion objects representing the chat history. Each object must contain "user" and "content".
+- `search_results`: Array, output of `/api/search`.
+- `history`: A list of chat completion objects representing the chat history. Each object must contain `user` and `content`.
 
 </details>
 
-<details>
-<summary><strong>Returns a JSON object containing the following properties:</strong></summary>
 
-- `id_exchange`: Unique identifier for this completion
-- `response`: Text of the response generated by the LLM
-- `response_info`: An object containg technical information about the response that was generated
-    - `response_info.completion_tokens`: Number of tokens generated by the LLM.
-    - `response_info.prompt_tokens`: Number of tokens passed to the LLM.
-    - `response_info.total_tokens`: Total number of tokens
-- `request_info`: An object containing information about the request given to the chatbot
-    - `request_info.message`: Same as input `message`
-    - `request_info.message_plus_prompt`: If RAG is enabled, presents the message alongside the context and retrieval prompt, as it was given to the LLM.
-    - `request_info.max_tokens`: Same as input `max_tokens`, if provided.
-    - `request_info.model`: Same as input `model`.
-    - `request_info.no_rag`: Same as input `no_rag`.
-    - `request_info.temperature`: Same as input `temperature`.
-- `context`: Array of objects, elements pulled from the vector store.
-    - `context[].warc_filename`: Filename of the WARC from which that excerpt is from.
-    - `context[].warc_record_content_type`: Can start with either `text/html` or `application/pdf`.
-    - `context[].warc_record_id`: Individual identifier of the WARC record within the WARC file. 
-    - `context[].warc_record_date`: Date at which the WARC record was created. 
-    - `context[].warc_record_target_uri`: Filename of the WARC from which that excerpt is from.
-    - `context[].warc_record_text`: Text excerpt.
-- `history`: Array of chat history objects (Open AI format). Does not contain full context as a tokens-saving measure.
-
-</details>
+Returns RAW text stream as output.
 
 [☝️ Summary](#summary)
 

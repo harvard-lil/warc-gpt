@@ -1,9 +1,19 @@
 :root {
   --font-family: 'Helvetica Neue', Helvetica, Arial, Sans-serif;
-  --font-family-alt: Georgia, Times, "Times New Roman", serif;  
+  --font-family-alt: Georgia, Times, "Times New Roman", serif; 
+
   --background: #F7F6F2;
   --background-: #e2e2e2;
+  --background--: #cfcfcf;
  
+  --color: #121212;
+  --color-: #2a2a2a;
+  --color--: #4c4c4c;
+
+  --primary: #F4D24B;
+  --primary-: #D6B42D;
+  --primary--: #bb9c20;
+
   --color: #002229;
   --color-: #04313a;
   --color--: #06525f;
@@ -28,7 +38,26 @@ html {
   background-color: var(--background);
 }
 
+@media (max-width: 381px) {
+  html {
+    font-size: 14px;
+  }
+}
+
 body {
+}
+
+a {
+  color: var(--color--);
+}
+
+a:hover {
+  color: var(--color--);
+  text-decoration: none;
+}
+
+.hidden {
+  display: none !important;
 }
 
 /*------------------------------------------------------------------------------
@@ -38,6 +67,7 @@ label {
   display: block;
   margin-bottom: 0.35rem;
   font-weight: normal;
+  margin-top: 1rem;
 }
 
 select, input[type="text"], input[type="number"], textarea {
@@ -56,8 +86,9 @@ select, input[type="text"], input[type="number"], textarea {
 
 textarea {
   font-size: 1rem;
-  padding: 0.65rem;
+  padding: 0.75rem;
   resize: none;
+  line-height: 1.5rem;
 }
 
 select {
@@ -71,13 +102,22 @@ button {
   background-color: var(--color);
   color: var(--background);
   font-family: var(--font-family);
-  font-weight: normal;
+  font-weight: bold;
   padding: 0.75rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
   font-size: 1rem;
   border-radius: 0.5rem;
   border: 0px;
   transition: all 0.25s ease-in-out;
   cursor: pointer;
+}
+
+button.hollow {
+  background-color: transparent;
+  font-weight: normal;
+  text-decoration: underline;
+  color: var(--color-);
 }
 
 button span {
@@ -88,32 +128,47 @@ button:not(:disabled):hover {
   text-decoration: underline;
 }
 
+button.hollow:not(:disabled):hover {
+  text-decoration: none;
+}
+
 button:disabled {
-  background-color: var(--color--);
+  background-color: var(--color-);
   cursor: not-allowed;
 }
 
+button.hollow:disabled {
+  background-color: transparent;
+  font-weight: normal;
+  color: var(--color--);
+  text-decoration: none;
+}
 
 /*------------------------------------------------------------------------------
  * Dialog (generic)
  -----------------------------------------------------------------------------*/
-dialog {
+ dialog {
   width: 85ch;
   max-width: 90%;
-  max-height: 80vh;
+  max-height: 80dvh;
   margin: auto;
   border: 0px;
-  border-radius: 0.5rem;
   padding: 2rem;
+  padding-top: 1rem;
+  border-radius: 0.25rem;
   background-color: var(--color);
   color: var(--background);
   border: 1px solid var(--color--);
 }
 
+dialog::backdrop {
+  background-color: rgba(0, 0, 0, 0.65);
+}
+
 /* "Close" button */
 dialog button.close {
   position: absolute;
-  top: 2.15rem;
+  top: 1.65rem;
   right: 1.5rem;
   z-index: 2;
   background-color: transparent;
@@ -125,272 +180,59 @@ dialog button.close:hover {
   text-decoration: none;
 }
 
-dialog::backdrop {
-  background-color: rgba(0, 0, 0, 0.65);
-}
-
 dialog h2 {
   position: relative;
-  top: 0.45rem;
-}
-
-dialog h3 {
-  border-top: 1px solid var(--color--);
-  padding-top: 1.5rem;
+  border-bottom: 1px solid var(--color-);
+  padding-top: 1rem;
+  padding-bottom: 1rem;
   margin-bottom: 1.5rem;
   font-weight: normal;
 }
 
-dialog h3:first-of-type {
-  margin-top: 2rem;
-}
-
-dialog ul {
-  list-style-position: inside;
-}
-
-dialog ul li {
-  margin-bottom: 0.5rem;
-}
-
-dialog a {
-  color: var(--primary-);
-  text-decoration: none;
-}
-
-dialog a:hover {
-  text-decoration: underline;
-}
-
-dialog table {
-  margin-bottom: 1rem;
-}
-
-dialog table tr {
-  vertical-align: top;
-}
-
-dialog table tr td:first-of-type {
-  min-width: 15ch;
-}
-
-dialog table tr td:last-of-type {
-  word-break: break-all;
-}
-
-dialog table tr td {
-  padding-bottom: 0.5rem;
-}
-
-dialog textarea {
-  height: 10rem;
-  padding: 1rem;
-  margin-bottom: 1.5rem;
-  background-color: var(--background-);
-  color: var(--color);
-  font-family: var(--font-family-alt);
-  line-height: 1.5rem;
-}
 
 /*------------------------------------------------------------------------------
  * Layout
  -----------------------------------------------------------------------------*/
-main {
-  display: grid;
-  grid-template-columns: 20rem 1fr;
-  grid-template-rows: 1fr;
-  grid-column-gap: 0px;
-  grid-row-gap: 0px;
-  min-height: 100vh;
-}
-
-h2 {
-  font-size: 1.5rem;
-  margin-bottom: 1rem;
-  font-weight: normal;
-}
-
-@media (max-width: 759px) {
-  main {
-    display: block;
-  }
-}
-
-/*------------------------------------------------------------------------------
- * Sidebar
- -----------------------------------------------------------------------------*/
-main > #settings { 
-  grid-area: 1 / 1 / 2 / 2;
-  background-color: var(--color);
-  color: var(--background);
-  padding: 1.5rem;
-
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;  
-}
-
-main > #settings #logo-main {
-  display: block;
-  max-width: 100%;
-  padding: 1rem;
-  padding-top: 0rem;
-  padding-bottom: 0rem;
-  margin-bottom: 1.5rem;
-}
-
-@media (max-width: 759px) {
-  main > #settings #logo-main {
-    max-width: 60%;
-    margin: auto;
-    margin-bottom: 1rem;
-  }
-}
-
-main > #settings #logo-lil {
-  display: block;
-  margin: auto;
-  max-width: 100%;
-  filter: invert();
-}
-
-@media (max-width: 759px) {
-  main > #settings #logo-lil {
-    max-width: 65%;
-    margin: auto;
-  }
-}
-
-main > #settings button.rag_prompt_override {
-  background-color: transparent;
-  display: block;
+body > main {
   width: 100%;
-  text-align: left;
-  text-decoration: underline;
-  padding-left: 0px;
-}
 
-main > #settings button.rag_prompt_override:hover {
-  text-decoration: none;
-}
+  height: 100vh;
+  height: 100dvh;
+  max-width: 85ch;
 
-dialog.rag_prompt_override textarea {
-  min-height: 15rem;
-}
-
-/*------------------------------------------------------------------------------
- * Chat UI
- -----------------------------------------------------------------------------*/
-main > #chat { 
-  grid-area: 1 / 2 / 2 / 3; 
-  padding: 1.5rem;
-  padding-top: 2rem;
+  margin: auto;
+  padding: 2rem;
   display: flex;
   flex-direction: column;
-  overflow-x: scroll;
-  max-width: 85ch;
-}
-
-main > #chat #chat-ui {
-  flex: 1;
-  overflow-y: scroll;
-  max-height: calc(95vh - 11rem);
-  min-height: calc(95vh - 11rem);
-  margin-bottom: 1rem;
+  justify-content: space-between;
 }
 
 @media (max-width: 759px) {
-  main > #chat #chat-ui {
-    max-height: 55vh;
-    min-height: 55vh;
+  body > main {
+    padding: 1rem;
   }
 }
 
-main > #chat #chat-ui .message {
-  width: 90%;
-  background-color: var(--background-);
-  padding: 1rem;
-  margin-bottom: 1.5rem;
-  border-radius: 0.5rem;
+body > main #chat {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
-main > #chat #chat-ui .message.user {
-  font-family: var(--font-family-alt);
-  line-height: 1.5rem;
-}
-
-main > #chat #chat-ui .message.ai {
-  margin-left: auto;
-  background-color: var(--color);
-  color: var(--background);
-  margin-bottom: 1rem;
-}
-
-main > #chat #chat-ui .message.ai .model {
-  /*font-family: var(--font-family-alt);*/
-  color: var(--primary-);
-}
-
-main > #chat #chat-ui .message.ai .response {
-  line-height: 1.35rem;
+body > main footer {
   padding-top: 1rem;
   padding-bottom: 1rem;
-  font-family: var(--font-family-alt);
+  text-align: center;
+}
+
+body > main footer p {
+  font-size: 0.85rem;
+  opacity: 0.8;
   line-height: 1.5rem;
 }
 
-main > #chat #chat-ui .message.ai .actions {
-  text-align: right;
-  margin-bottom: 1.5rem;
+body > main footer img {
+  max-width: 35ch;
+  padding-top: 0.5rem;
 }
-
-main > #chat #chat-ui .actions {
-  text-align: right;
-  margin-bottom: 1.5rem;
-}
-
-main > #chat #chat-ui .actions button {
-  background-color: unset;
-  color: var(--color);
-  padding-top: 0px;
-  padding-bottom: 0px;
-  text-decoration: underline;
-  transition-duration: 0.15s;
-}
-
-main > #chat #chat-ui .actions button:hover {
-  text-decoration: none;
-}
-
-main > #chat #chat-ui .actions button:active {
-  opacity: 0.75;
-}
-
-main > #chat #chat-ui .actions button.show-sources {
-}
-
-main > #chat #chat-input {
-  flex: 0.5;
-  text-align: left;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-}
-
-main > #chat #chat-input textarea {
-  height: 5rem;
-  font-family: var(--font-family-alt);
-  line-height: 1.5rem;
-  border-bottom-right-radius: 0px;
-}
-
-main > #chat #chat-input button {
-  display: inline-block;
-  width: 20ch;
-  position: relative;
-  top: -0.725rem;
-  border-top-left-radius: 0px;
-  border-top-right-radius: 0px;
-  margin-left: auto;
-}
-

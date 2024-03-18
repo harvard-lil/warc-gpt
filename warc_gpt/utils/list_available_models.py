@@ -1,49 +1,48 @@
-"""
-`utils.list_available_models` module: Checks what models LiteLLM has access to.
-"""
 import os
+import traceback
 
-import litellm
-import requests
-
-
-litellm.telemetry = False
+from flask import current_app
+from openai import OpenAI
+import ollama
 
 
 def list_available_models() -> list:
     """
-    Returns a list of the models LiteLLM can talk to based on current environment.
-    More info:
-    - https://docs.litellm.ai/docs/
-    - https://github.com/jmorganca/ollama/blob/main/docs/api.md#list-local-models
+    Returns a list of the models the pipeline can talk to based on current environment.
     """
     models = []
 
-    if os.environ.get("OPENAI_API_KEY"):
-        for model in litellm.open_ai_chat_completion_models:
-            if model.startswith("gpt"):
-                models.append(model)
+    # Use case: Using OpenAI's client to interact with a non-OpenAI provider.
+    # In that case, the model's name is provided via the environment.
+    if os.environ.get("OPENAI_BASE_URL") and os.environ.get("OPENAI_COMPATIBLE_MODEL"):
+        models.append(os.environ.get("OPENAI_COMPATIBLE_MODEL"))
 
-    if os.environ.get("ANTHROPIC_API_KEY"):
-        for model in litellm.anthropic_models:
-            models.append(model)
+    # Use case: OpenAI
+    if os.environ.get("OPENAI_API_KEY") and not os.environ.get("OPENAI_BASE_URL"):
+        try:
+            openai_client = OpenAI()
 
-    if os.environ.get("COHERE_API_KEY"):
-        for model in litellm.cohere_models:
-            models.append(model)
+            for model in openai_client.models.list().data:
+                if model.id.startswith("gpt-4"):
+                    models.append(f"openai/{model.id}")
 
-    if os.environ.get("PERPLEXITYAI_API_KEY"):
-        for model in litellm.perplexity_models:
-            models.append(model)
+        except Exception:
+            current_app.logger.error("Could not list OpenAI models.")
+            current_app.logger.error(traceback.format_exc())
 
-    # List models available at Ollama endpoint if provided
-    try:
-        ollama_api_url = os.environ.get("OLLAMA_API_URL", "http://localhost:11343")
-        response = requests.get(f"{ollama_api_url}/api/tags", timeout=1).json()
+    # Use case: Ollama
+    if os.environ.get("OLLAMA_API_URL"):
+        try:
+            ollama_client = ollama.Client(
+                host=os.environ["OLLAMA_API_URL"],
+                timeout=5,
+            )
 
-        for model in response["models"]:
-            models.append(f"ollama/{model['name']}")
-    except Exception:
-        pass
+            for model in ollama_client.list()["models"]:
+                models.append(f"ollama/{model['name']}")
+
+        except Exception:
+            current_app.logger.error("Could not list Ollama models.")
+            current_app.logger.error(traceback.format_exc())
 
     return models

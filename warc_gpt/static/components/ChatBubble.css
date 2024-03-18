@@ -1,0 +1,118 @@
+chat-bubble {
+  display: block;
+  width: fit-content;
+  max-width: 80%;
+  margin-left: auto;
+  background-color: var(--background-);
+  padding: 1rem;
+  border-radius: 0.25rem;
+  margin-bottom: 1.5rem;
+  margin-right: 1rem;
+  line-height: 1.5rem;
+  position: relative;
+  line-break: loose;
+}
+
+chat-bubble::before {
+  content: "";
+  width: 0px;
+  height: 0px;
+  position: absolute;
+  top: 0rem;
+  right: -1rem;
+  border-left: 0.75rem solid var(--background-);
+  border-right: 0.75rem solid transparent;
+  border-top: 0.75rem solid var(--background-);
+  border-bottom: 0.75rem solid transparent;
+}
+
+chat-bubble .actor {
+  font-weight: normal;
+  font-style: italic;
+  margin-bottom: 0.5rem;
+  color: var(--color--);
+}
+
+chat-bubble code {
+  display: block;
+  padding: 1rem;
+  background-color: var(--background);
+  border-radius: 0.25rem;
+  margin-top: 0.5rem;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+
+chat-bubble[type="user"] {
+  margin-left: unset;
+  margin-right: auto;
+  background-color: var(--color);
+  color: var(--background);
+  margin-right: unset;
+  margin-left: 1rem;
+}
+
+chat-bubble[type="user"]::before {
+  right: unset;
+  left: -1rem;
+  border-top-color: var(--color);
+  border-left-color: var(--color);
+  rotate: 90deg;
+}
+
+chat-bubble[type="ai"] .text {
+  white-space: pre-line;
+}
+
+chat-bubble[type="sources"] .text {
+  margin-bottom: 1rem;
+}
+
+chat-bubble[type="sources"] .actor span {
+  text-transform: capitalize;
+}
+
+chat-bubble[type="sources"] .text * {
+  display: block;
+}
+
+chat-bubble[type="sources"] details summary {
+  padding-bottom: 0.5rem;
+  cursor: pointer;
+  color: var(--color);
+  text-decoration: underline;
+}
+
+chat-bubble[type="sources"] details summary:hover, 
+chat-bubble[type="sources"] details[open] summary {
+  text-decoration: none;
+}
+
+chat-bubble[type="sources"] details table {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+chat-bubble[type="sources"] details  table tr {
+  vertical-align: top;
+}
+
+chat-bubble[type="sources"] details table tr td:first-of-type {
+  min-width: 11ch;
+}
+
+chat-bubble[type="sources"] details table tr td:last-of-type {
+  word-break: break-all;
+}
+
+chat-bubble[type="sources"] details table tr td {
+  padding-bottom: 0.5rem;
+}
+
+chat-bubble[type="sources"] details textarea {
+  height: 10rem;
+  background-color: var(--background);
+  color: var(--color-);
+  line-height: 1.55rem;
+  margin-bottom: 1rem;
+}
