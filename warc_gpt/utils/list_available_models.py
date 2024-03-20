@@ -23,7 +23,7 @@ def list_available_models() -> list:
             openai_client = OpenAI()
 
             for model in openai_client.models.list().data:
-                if model.id.startswith("gpt-4"):
+                if model.id.startswith("gpt-"):
                     models.append(f"openai/{model.id}")
 
         except Exception:
