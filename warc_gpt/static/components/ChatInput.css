@@ -1,0 +1,26 @@
+chat-input {
+  display: block;
+  border-bottom: 1px solid var(--background--);
+  padding: 2rem;
+  padding-left: 0rem;
+  padding-right: 0rem;
+}
+
+chat-input textarea {
+  height: 5rem;
+  border-bottom-right-radius: 0px;
+  font-family: var(--font-family-alt);
+}
+
+chat-input button.ask {
+  padding-left: 5ch;
+  padding-right: 5ch;
+  border-top-right-radius: 0px;
+  border-top-left-radius: 0px;
+}
+
+chat-input .actions {
+  text-align: right;
+  position: relative;
+  top: -0.65rem;
+}

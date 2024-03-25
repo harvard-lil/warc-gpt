@@ -1,6 +1,3 @@
-"""
-`utils.check_env` module: Checks that required env variables are available.
-"""
 import os
 
 
@@ -12,6 +9,9 @@ def check_env() -> bool:
     environ = os.environ
 
     for prop in [
+        "TEXT_COMPLETION_BASE_PROMPT",
+        "TEXT_COMPLETION_RAG_PROMPT",
+        "TEXT_COMPLETION_HISTORY_PROMPT",
         "WARC_FOLDER_PATH",
         "VISUALIZATIONS_FOLDER_PATH",
         "VECTOR_SEARCH_PATH",
@@ -24,7 +24,9 @@ def check_env() -> bool:
         "VECTOR_SEARCH_SENTENCE_TRANSFORMER_DEVICE",
         "VECTOR_SEARCH_TEXT_SPLITTER_CHUNK_OVERLAP",
         "VECTOR_SEARCH_SEARCH_N_RESULTS",
-        "RAG_PROMPT",
+        "API_MODELS_RATE_LIMIT",
+        "API_SEARCH_RATE_LIMIT",
+        "API_COMPLETE_RATE_LIMIT",
     ]:
         if prop not in environ:
             raise Exception(f"env var {prop} must be defined.")

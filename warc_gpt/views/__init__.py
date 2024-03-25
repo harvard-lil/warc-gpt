@@ -1,2 +1,2 @@
-from .api import get_models, post_completion
-from .ui import get_root
+import warc_gpt.views.ui
+import warc_gpt.views.api

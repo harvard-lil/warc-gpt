@@ -2,77 +2,62 @@
 <html lang="en" data-theme="light">
   <head>
     <title>WARC-GPT</title>
-    <meta name="description" content="Experimental Retrieval Augmented Generation Pipeline for Web Archive Collections. ">
+    <meta
+      name="description"
+      content="Experimental Retrieval Augmented Generation Pipeline for Web Archive Collections."
+    />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+      // App-wide consts coming from the back-end
+      window.WARC_GPT_CONST = {{ app_consts | safe }};
+    </script>
 
-    <link rel="stylesheet" href="/static/index.css">
-    <script type="module" src="/static/index.js"></script>
+    <link rel="stylesheet" href="/static/index.css" />
+
+    <script type="module" src="/static/components/ChatBubble.js"></script>
+    <link rel="stylesheet" href="/static/components/ChatBubble.css" />
+
+    <script type="module" src="/static/components/ChatFlow.js"></script>
+    <link rel="stylesheet" href="/static/components/ChatFlow.css" />
+
+    <script type="module" src="/static/components/ChatInput.js"></script>
+    <link rel="stylesheet" href="/static/components/ChatInput.css" />
+
+    <script type="module" src="/static/components/InspectDialog.js"></script>
+    <link rel="stylesheet" href="/static/components/InspectDialog.css" />
+
+    <script type="module" src="/static/components/SettingsDialog.js"></script>
+    <link rel="stylesheet" href="/static/components/SettingsDialog.css" />
   </head>
 
   <body>
-
     <main>
-      <section id="chat">
-        <div id="chat-ui"></div>
+      <div id="chat">
+        <chat-flow></chat-flow>
+        <chat-input></chat-input>
+      </div>
 
-        <form id="chat-input">
-          <textarea id="message" placeholder="This chatbot can answer questions about web archive files it ingested." required></textarea>
-          <button id="ask" disabled>Ask <span>WARC-GPT</span></button>
-        </form>
-      </section>
-
-      <aside id="settings">
-        <form id="settings-form">      
-          <img id="logo-main" src="/static/images/logo-title-white.svg" alt="WARC-GPT" aria-hidden="true"/>
-
-          <label for="model">Model</label>
-          <select id="model" name="model">
-            {% for model in available_models %}
-            <option value="{{ model }}">{{ model }}</option>
-            {% endfor %}
-          </select>
-
-          <label for="temperature">Temperature</label>
-          <select id="temperature" name="temperature">
-            {% for i in range(0, 21) %}
-            <option value="{{ i / 10 }}">{{ i / 10}}</option>
-            {% endfor %}
-          </select>
-
-          <label for="max_tokens">Max tokens</label>
-          <input type="number" name="max_tokens" id="max_tokens" value="" placeholder="Default">
-
-          <label for="no_rag">Disable RAG</label> 
-          <select id="no_rag" name="no_rag">
-            <option value="false">No</option>
-            <option value="true">Yes</option>
-          </select>
-
-          <label for="no_rag">Disable History</label> 
-          <select id="no_history" name="no_history">
-            <option value="false">No</option>
-            <option value="true">Yes</option>
-          </select>
-          
-          <button class="rag_prompt_override">Edit RAG prompt</button>
-        </form>
-
-        <a href="https://lil.law.harvard.edu" title="Harvard Library Innovation Lab">
-          <img id="logo-lil" src="/static/images/lil.svg" alt="Harvard Library Innovation Lab">
+      <footer>
+        <a href="https://lil.law.harvard.edu">
+          <img
+            src="/static/images/lil.svg"
+            alt="Harvard Library Innovation Lab - Logo"
+          />
         </a>
-      </aside>
 
-      <dialog class="rag_prompt_override">
-        <button class="close">Close</button>
-        <h2>Edit RAG Prompt</h2>
-
-        <h3>Retrieval Prompt</h3>
-        <textarea id="rag_prompt_override">{{ rag_prompt }}</textarea>
-      </dialog>
-
+        <p>
+          <a href="https://github.com/harvard-lil/warc-gpt">WARC-GPT</a>
+          is an open-source experiment by the
+          <a href="https://lil.law.harvard.edu"
+            >Harvard Library Innovation Lab</a
+          >.<br />
+        </p>
+      </footer>
     </main>
 
+    <settings-dialog></settings-dialog>
+    <inspect-dialog></inspect-dialog>
   </body>
 </html>
