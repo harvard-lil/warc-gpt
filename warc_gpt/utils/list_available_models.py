@@ -28,7 +28,7 @@ def list_available_models() -> list:
 
         except Exception:
             current_app.logger.error("Could not list OpenAI models.")
-            current_app.logger.error(traceback.format_exc())
+            current_app.logger.debug(traceback.format_exc())
 
     # Use case: Ollama
     if os.environ.get("OLLAMA_API_URL"):
@@ -43,6 +43,6 @@ def list_available_models() -> list:
 
         except Exception:
             current_app.logger.error("Could not list Ollama models.")
-            current_app.logger.error(traceback.format_exc())
+            current_app.logger.debug(traceback.format_exc())
 
     return models

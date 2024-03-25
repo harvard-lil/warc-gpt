@@ -71,7 +71,7 @@ def post_search():
 
         assert embedding_model
     except Exception:
-        current_app.logger.error(traceback.format_exc())
+        current_app.logger.debug(traceback.format_exc())
         return jsonify({"error": "Could not load embedding model."}), 500
 
     # Chroma client
@@ -87,7 +87,7 @@ def post_search():
 
         assert chroma_client
     except Exception:
-        current_app.logger.error(traceback.format_exc())
+        current_app.logger.debug(traceback.format_exc())
         return jsonify({"error": "Could not load ChromaDB client."}), 500
 
     # Chroma collection
@@ -102,7 +102,7 @@ def post_search():
 
         assert chroma_collection
     except Exception:
-        current_app.logger.error(traceback.format_exc())
+        current_app.logger.debug(traceback.format_exc())
         return jsonify({"error": "Could not load ChromaDB collection."}), 500
 
     #
@@ -119,7 +119,7 @@ def post_search():
             n_results=int(environ["VECTOR_SEARCH_SEARCH_N_RESULTS"]),
         )
     except Exception:
-        current_app.logger.error(traceback.format_exc())
+        current_app.logger.debug(traceback.format_exc())
         return jsonify({"error": "Could not retrieve context from vector store."}), 500
 
     #

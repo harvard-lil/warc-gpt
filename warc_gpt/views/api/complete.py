@@ -205,5 +205,5 @@ def post_complete():
 
             return Response(generate_openai(), mimetype="text/plain")
     except Exception:
-        current_app.logger.error(traceback.format_exc())
+        current_app.logger.debug(traceback.format_exc())
         return jsonify({"error": f"Could not run completion against {model}."}), 500

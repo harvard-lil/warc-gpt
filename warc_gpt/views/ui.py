@@ -13,6 +13,7 @@ def get_root():
     Renders the app's UI.
     """
     available_models = list_available_models()
+    default_model = ""
 
     #
     # Select default model

@@ -9,8 +9,6 @@ import { state } from "../state.js";
  * Automatically populates:
  * - `state.processing`
  * - `state.history`
- * - `state.searchStatement`
- * - `state.searchTarget`
  * - `state.searchResults`
  *
  * Automatically enables / disables relevant inputs based on app state.
@@ -20,7 +18,7 @@ export class ChatFlow extends HTMLElement {
   currentAICursorRef = null;
 
   connectedCallback() {
-    // Enforce singleton
+    // Enforce singleton pattern: there can only be 1 instance of this element in the DOM
     for (const node of [...document.querySelectorAll("chat-flow")].slice(1)) {
       node.remove();
     }
@@ -239,8 +237,13 @@ export class ChatFlow extends HTMLElement {
 
   /**
    * Automatically scroll to the bottom of the conversation.
+   * Disabled if state.reducedMotion is `true`.
    */
   scrollIntoConversation = () => {
+    if (state.reducedMotion === true) {
+      return;
+    }
+
     this.scroll({
       top: this.scrollHeight,
       left: 0,

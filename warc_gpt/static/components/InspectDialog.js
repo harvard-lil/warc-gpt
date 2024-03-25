@@ -8,7 +8,7 @@ import { state } from "../state.js";
  */
 export class InspectDialog extends HTMLElement {
   connectedCallback() {
-    // Enforce singleton
+    // Enforce singleton pattern: there can only be 1 instance of this element in the DOM
     for (const node of [...document.querySelectorAll("chat-flow")].slice(1)) {
       node.remove();
     }

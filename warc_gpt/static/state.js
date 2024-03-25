@@ -17,6 +17,7 @@ const constants = window.WARC_GPT_CONST;
  * @property {string} ragPrompt - Transcript of the RAG (context) part of the prompt.
  * @property {string[]} availableModels - List of models that can be used.
  * @property {string} defaultModel - Model to be used by default.
+ * @property {string} reducedMotion - Whether the `prefers-reduced-motion: reduce` directive was detected.
  */
 
 /**
@@ -42,4 +43,6 @@ export const state = {
   ragPrompt: constants.text_completion_rag_prompt,
   availableModels: constants.available_models,
   defaultModel: constants.default_model,
+
+  reducedMotion: window.matchMedia(`(prefers-reduced-motion: reduce)`) === true || window.matchMedia(`(prefers-reduced-motion: reduce)`).matches === true
 };
