@@ -182,30 +182,29 @@ def ingest() -> None:
                 if not text_chunks:
                     continue
 
+                chunk_range = range(len(text_chunks))
                 # Add VECTOR_SEARCH_CHUNK_PREFIX to every chunk
-                for i in range(0, len(text_chunks)):
-                    text_chunks[i] = chunk_prefix + text_chunks[i]
+                text_chunks = [chunk_prefix + chunk for chunk in text_chunks]
 
                 # Generate embeddings and metadata for each chunk
-                documents = []
-                metadatas = []
-                ids = []
-                embeddings = []
+                documents = [record_data["warc_filename"] for _ in chunk_range]
+                ids = [f"{record_data['warc_record_id']}-{i+1}" for i in chunk_range]
 
                 # 1 metadata / document / id object per chunk
-                for i in range(0, len(text_chunks)):
-                    documents.append(record_data["warc_filename"])
-                    ids.append(f"{record_data['warc_record_id']}-{i+1}")
-
+                metadatas = []
+                for i in chunk_range:
                     metadata = dict(record_data)
                     metadata["warc_record_text"] = text_chunks[i][len(chunk_prefix) :]  # noqa
                     metadatas.append(metadata)
 
                 # 1 embedding per chunk
-                embeddings = embedding_model.encode(
-                    text_chunks,
-                    normalize_embeddings=normalize_embeddings,
-                ).tolist()
+                embeddings = [
+                    embedding_model.encode(
+                        [chunk],
+                        normalize_embeddings=normalize_embeddings,
+                    ).tolist()[0]
+                    for chunk in text_chunks
+                ]
 
                 total_embeddings += len(embeddings)
 
