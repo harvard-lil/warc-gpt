@@ -17,6 +17,8 @@ from sentence_transformers import SentenceTransformer
 from warcio.archiveiterator import ArchiveIterator
 from langchain.text_splitter import SentenceTransformersTokenTextSplitter
 from flask import current_app
+from time import perf_counter
+from statistics import mean
 
 from warc_gpt import WARC_RECORD_DATA
 
@@ -39,6 +41,10 @@ def ingest() -> None:
     chroma_collection = None
     total_records = 0
     total_embeddings = 0
+
+    encoding_timings = []
+    multiplier = 1.1
+    multi_chunk_mode = True
 
     # Cleanup
     rmtree(environ["VECTOR_SEARCH_PATH"], ignore_errors=True)
@@ -183,28 +189,54 @@ def ingest() -> None:
                     continue
 
                 chunk_range = range(len(text_chunks))
+
                 # Add VECTOR_SEARCH_CHUNK_PREFIX to every chunk
                 text_chunks = [chunk_prefix + chunk for chunk in text_chunks]
 
                 # Generate embeddings and metadata for each chunk
+                # 1 metadata / document / id object per chunk
                 documents = [record_data["warc_filename"] for _ in chunk_range]
+
                 ids = [f"{record_data['warc_record_id']}-{i+1}" for i in chunk_range]
 
-                # 1 metadata / document / id object per chunk
                 metadatas = []
                 for i in chunk_range:
                     metadata = dict(record_data)
-                    metadata["warc_record_text"] = text_chunks[i][len(chunk_prefix) :]  # noqa
+                    metadata["warc_record_text"] = text_chunks[i][len(chunk_prefix):]
                     metadatas.append(metadata)
 
                 # 1 embedding per chunk
-                embeddings = [
-                    embedding_model.encode(
-                        [chunk],
+                # In some contexts, passing all the text chunks to embedding_model.encode() at once
+                # takes advantage of parallelization, so we default to that, but stop doing it if
+                # it is too slow.
+                if multi_chunk_mode:
+                    start = perf_counter()
+                    embeddings = embedding_model.encode(
+                        text_chunks,
                         normalize_embeddings=normalize_embeddings,
-                    ).tolist()[0]
-                    for chunk in text_chunks
-                ]
+                    ).tolist()
+                    encoding_time = perf_counter() - start
+
+                    if len(text_chunks) == 1:
+                        encoding_timings.append((1, encoding_time))
+                    else:
+                        one_chunk_times = [e[1] for e in encoding_timings if e[0] == 1]
+                        if len(one_chunk_times) == 0:
+                            pass
+                        elif encoding_time > len(text_chunks) * mean(one_chunk_times) * multiplier:
+                            multi_chunk_mode = False
+                            click.echo('Leaving multi-chunk mode')
+                        encoding_timings.append((len(text_chunks), encoding_time))
+                else:
+                    # we've left multi-chunk mode, and there's no need to capture
+                    # timings anymore
+                    embeddings = [
+                        embedding_model.encode(
+                            [chunk],
+                            normalize_embeddings=normalize_embeddings,
+                        ).tolist()[0]
+                        for chunk in text_chunks
+                    ]
 
                 total_embeddings += len(embeddings)
 
