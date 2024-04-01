@@ -19,9 +19,16 @@ from flask import current_app
     required=False,
     default="",
     type=str,
-    help="Can be used to place questions on the plot, to visualize their nearest neighbors. Use ; as a separator.",
+    help="Can be used to place questions on the plot, to visualize their nearest neighbors. Use ; as a separator.",  # noqa
 )
-def visualize(questions: str) -> None:
+@click.option(
+    "--perplexity",
+    default=30.0,
+    type=float,
+    help="TSNE default setting; reduce for small input sets.",
+    show_default=True
+)
+def visualize(questions: str, perplexity: float) -> None:
     """
     Generates an interactive T-SNE 2D plot for the vector store created via the `ingest` command.
 
@@ -73,7 +80,14 @@ def visualize(questions: str) -> None:
     else:
         scatter_plot_data = pd.DataFrame(all_vectors["embeddings"])
 
-    scatter_plot_data = TSNE(n_components=2).fit_transform(scatter_plot_data)
+    try:
+        scatter_plot_data = TSNE(perplexity=perplexity).fit_transform(scatter_plot_data)
+    except ValueError as e:
+        if f'{e}' == "perplexity must be less than n_samples":
+            click.echo("You may not have enough input data; add some or reduce perplexity to less than n_samples.")  # noqa
+            return 1
+        else:
+            raise
 
     scatter_plot_data = pd.DataFrame(scatter_plot_data)
     scatter_plot_data = scatter_plot_data.rename(columns={0: "x", 1: "y"})
