@@ -195,7 +195,14 @@ def ingest(multi_chunk_mode) -> None:
                 text_chunks = [chunk_prefix + chunk for chunk in text_chunks]
 
                 # Generate embeddings and metadata for each chunk
-                documents, ids, metadatas, embeddings, encoding_timings = chunk_objects(
+                (
+                    documents,
+                    ids,
+                    metadatas,
+                    embeddings,
+                    multi_chunk_mode,
+                    encoding_timings
+                ) = chunk_objects(
                     record_data,
                     text_chunks,
                     embedding_model,
@@ -223,7 +230,8 @@ def chunk_objects(
     encoding_timings: list[float],
 ):
     """
-    Return one document, metadata, id, and embedding object per chunk
+    Return one document, metadata, id, and embedding object per chunk; also return
+    control variables multi_chunk_mode and encoding_timings
 
     """
     environ = os.environ
@@ -237,7 +245,7 @@ def chunk_objects(
     ids = [f"{record_data['warc_record_id']}-{i+1}" for i in chunk_range]
 
     metadatas = [
-        dict(record_data, **{"warc_record_text": text_chunks[i][len(chunk_prefix) :]})
+        dict(record_data, **{"warc_record_text": text_chunks[i][len(chunk_prefix):]})
         for i in chunk_range
     ]
 
@@ -270,4 +278,4 @@ def chunk_objects(
             for chunk in text_chunks
         ]
 
-    return documents, ids, metadatas, embeddings, encoding_timings
+    return documents, ids, metadatas, embeddings, multi_chunk_mode, encoding_timings
