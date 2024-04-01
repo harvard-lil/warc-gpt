@@ -24,7 +24,9 @@ from warc_gpt import WARC_RECORD_DATA
 
 
 @current_app.cli.command("ingest")
-def ingest() -> None:
+@click.option("--multi-chunk-mode/--no-multi-chunk-mode", default=True,
+              help="Encode multiple chunks at once", show_default=True)
+def ingest(multi_chunk_mode) -> None:
     """
     Generates sentence embeddings and metadata for a set of WARCs and saves them in a vector store.
 
@@ -42,9 +44,8 @@ def ingest() -> None:
     total_records = 0
     total_embeddings = 0
 
-    encoding_timings = []
-    multiplier = 1.1
-    multi_chunk_mode = True
+    if multi_chunk_mode:
+        encoding_timings = []
 
     # Cleanup
     rmtree(environ["VECTOR_SEARCH_PATH"], ignore_errors=True)
@@ -199,11 +200,12 @@ def ingest() -> None:
 
                 ids = [f"{record_data['warc_record_id']}-{i+1}" for i in chunk_range]
 
-                metadatas = []
-                for i in chunk_range:
-                    metadata = dict(record_data)
-                    metadata["warc_record_text"] = text_chunks[i][len(chunk_prefix):]
-                    metadatas.append(metadata)
+                metadatas = [
+                    dict(
+                        record_data,
+                        **{"warc_record_text": text_chunks[i][len(chunk_prefix):]}
+                    ) for i in chunk_range
+                ]
 
                 # 1 embedding per chunk
                 # In some contexts, passing all the text chunks to embedding_model.encode() at once
@@ -218,18 +220,15 @@ def ingest() -> None:
                     encoding_time = perf_counter() - start
 
                     if len(text_chunks) == 1:
-                        encoding_timings.append((1, encoding_time))
+                        encoding_timings.append(encoding_time)
                     else:
-                        one_chunk_times = [e[1] for e in encoding_timings if e[0] == 1]
-                        if len(one_chunk_times) == 0:
+                        if len(encoding_timings) == 0:
                             pass
-                        elif encoding_time > len(text_chunks) * mean(one_chunk_times) * multiplier:
+                        elif encoding_time > len(text_chunks) * mean(encoding_timings):
                             multi_chunk_mode = False
                             click.echo('Leaving multi-chunk mode')
-                        encoding_timings.append((len(text_chunks), encoding_time))
                 else:
-                    # we've left multi-chunk mode, and there's no need to capture
-                    # timings anymore
+                    # we've left multi-chunk mode, and there's no need to capture timings anymore
                     embeddings = [
                         embedding_model.encode(
                             [chunk],
