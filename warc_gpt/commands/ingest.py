@@ -25,12 +25,13 @@ from warc_gpt import WARC_RECORD_DATA
 
 @current_app.cli.command("ingest")
 @click.option(
-    "--multi-chunk-mode/--no-multi-chunk-mode",
-    default=True,
-    help="Encode multiple chunks at once",
+    "--batch-size",
+    default=2,
+    type=int,
+    help="Batch size for encoding",
     show_default=True,
 )
-def ingest(multi_chunk_mode) -> None:
+def ingest(batch_size) -> None:
     """
     Generates sentence embeddings and metadata for a set of WARCs and saves them in a vector store.
 
@@ -47,6 +48,12 @@ def ingest(multi_chunk_mode) -> None:
     total_records = 0
     total_embeddings = 0
 
+    if batch_size == 1:
+        multi_chunk_mode = False
+    elif batch_size > 1:
+        multi_chunk_mode = True
+    else:
+        raise click.UsageError("Batch size must be a positive integer, preferably a power of 2")
     encoding_timings = []
 
     # Cleanup
@@ -208,6 +215,7 @@ def ingest(multi_chunk_mode) -> None:
                     embedding_model,
                     multi_chunk_mode,
                     encoding_timings,
+                    batch_size
                 )
                 total_embeddings += len(embeddings)
 
@@ -228,6 +236,7 @@ def chunk_objects(
     embedding_model: SentenceTransformer,
     multi_chunk_mode: bool,
     encoding_timings: list[float],
+    batch_size: int
 ):
     """
     Return one document, metadata, id, and embedding object per chunk; also return
@@ -256,6 +265,7 @@ def chunk_objects(
         start = perf_counter()
         embeddings = embedding_model.encode(
             text_chunks,
+            batch_size=batch_size,
             normalize_embeddings=normalize_embeddings,
         ).tolist()
         encoding_time = perf_counter() - start
@@ -273,6 +283,7 @@ def chunk_objects(
         embeddings = [
             embedding_model.encode(
                 [chunk],
+                batch_size=1,
                 normalize_embeddings=normalize_embeddings,
             ).tolist()[0]
             for chunk in text_chunks
