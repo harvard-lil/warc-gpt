@@ -24,8 +24,12 @@ from warc_gpt import WARC_RECORD_DATA
 
 
 @current_app.cli.command("ingest")
-@click.option("--multi-chunk-mode/--no-multi-chunk-mode", default=True,
-              help="Encode multiple chunks at once", show_default=True)
+@click.option(
+    "--multi-chunk-mode/--no-multi-chunk-mode",
+    default=True,
+    help="Encode multiple chunks at once",
+    show_default=True,
+)
 def ingest(multi_chunk_mode) -> None:
     """
     Generates sentence embeddings and metadata for a set of WARCs and saves them in a vector store.
@@ -192,7 +196,11 @@ def ingest(multi_chunk_mode) -> None:
 
                 # Generate embeddings and metadata for each chunk
                 documents, ids, metadatas, embeddings, encoding_timings = chunk_objects(
-                    record_data, text_chunks, embedding_model, multi_chunk_mode, encoding_timings
+                    record_data,
+                    text_chunks,
+                    embedding_model,
+                    multi_chunk_mode,
+                    encoding_timings,
                 )
                 total_embeddings += len(embeddings)
 
@@ -207,9 +215,13 @@ def ingest(multi_chunk_mode) -> None:
     click.echo(f"Total: {total_embeddings} embeddings from {total_records} HTML/PDF records.")
 
 
-def chunk_objects(record_data: dict, text_chunks: list[str],
-                  embedding_model: SentenceTransformer,
-                  multi_chunk_mode: bool, encoding_timings: list[float]):
+def chunk_objects(
+    record_data: dict,
+    text_chunks: list[str],
+    embedding_model: SentenceTransformer,
+    multi_chunk_mode: bool,
+    encoding_timings: list[float],
+):
     """
     Return one document, metadata, id, and embedding object per chunk
 
@@ -225,10 +237,8 @@ def chunk_objects(record_data: dict, text_chunks: list[str],
     ids = [f"{record_data['warc_record_id']}-{i+1}" for i in chunk_range]
 
     metadatas = [
-        dict(
-            record_data,
-            **{"warc_record_text": text_chunks[i][len(chunk_prefix):]}
-        ) for i in chunk_range
+        dict(record_data, **{"warc_record_text": text_chunks[i][len(chunk_prefix) :]})
+        for i in chunk_range
     ]
 
     # In some contexts, passing all the text chunks to embedding_model.encode() at once
@@ -249,7 +259,7 @@ def chunk_objects(record_data: dict, text_chunks: list[str],
                 pass
             elif encoding_time > len(text_chunks) * mean(encoding_timings):
                 multi_chunk_mode = False
-                click.echo('Leaving multi-chunk mode')
+                click.echo("Leaving multi-chunk mode")
     else:
         # we've left multi-chunk mode, and there's no need to capture timings anymore
         embeddings = [
