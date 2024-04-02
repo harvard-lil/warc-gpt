@@ -10,3 +10,6 @@ test.py
 TODO.md
 runs/
 _*/
+
+tests/visualizations/
+tests/chromadb/
