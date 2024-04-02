@@ -24,7 +24,7 @@ def post_complete():
     - "temperature": Defaults to 0.0
     - "search_results": Output from /api/search. List of WARC_RECORD_DATA entries.
     - "max_tokens": If provided, caps number of tokens that will be generated in response.
-    - "history": A list of chat completion objects representing the chat history. Each object must contain "user" and "content".
+    - "history": A list of chat completion objects representing the chat history. Each object must contain "user" and "content".  # noqa
 
     Example of a "history" list:
     ```

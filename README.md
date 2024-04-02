@@ -83,6 +83,9 @@ Place the WARC files you would to explore with WARC-GPT under `./warc` and run t
 
 ```bash
 poetry run flask ingest
+
+# May help with performance in certain cases: only ingest 1 chunk of text at a time.
+poetry run flask ingest --batch-size 1
 ```
 
 **Note:** Running `ingest` clears the `./chromadb` folder.

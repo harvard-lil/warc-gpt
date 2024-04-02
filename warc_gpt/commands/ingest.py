@@ -17,12 +17,21 @@ from sentence_transformers import SentenceTransformer
 from warcio.archiveiterator import ArchiveIterator
 from langchain.text_splitter import SentenceTransformersTokenTextSplitter
 from flask import current_app
+from time import perf_counter
+from statistics import mean
 
 from warc_gpt import WARC_RECORD_DATA
 
 
 @current_app.cli.command("ingest")
-def ingest() -> None:
+@click.option(
+    "--batch-size",
+    default=2,
+    type=int,
+    help="Batch size for encoding",
+    show_default=True,
+)
+def ingest(batch_size) -> None:
     """
     Generates sentence embeddings and metadata for a set of WARCs and saves them in a vector store.
 
@@ -30,7 +39,6 @@ def ingest() -> None:
     """
     environ = os.environ
 
-    normalize_embeddings = environ["VECTOR_SEARCH_NORMALIZE_EMBEDDINGS"] == "true"
     chunk_prefix = environ["VECTOR_SEARCH_CHUNK_PREFIX"]
 
     warc_files = []
@@ -39,6 +47,14 @@ def ingest() -> None:
     chroma_collection = None
     total_records = 0
     total_embeddings = 0
+
+    if batch_size == 1:
+        multi_chunk_mode = False
+    elif batch_size > 1:
+        multi_chunk_mode = True
+    else:
+        raise click.UsageError("Batch size must be a positive integer, preferably a power of 2")
+    encoding_timings = []
 
     # Cleanup
     rmtree(environ["VECTOR_SEARCH_PATH"], ignore_errors=True)
@@ -183,30 +199,24 @@ def ingest() -> None:
                     continue
 
                 # Add VECTOR_SEARCH_CHUNK_PREFIX to every chunk
-                for i in range(0, len(text_chunks)):
-                    text_chunks[i] = chunk_prefix + text_chunks[i]
+                text_chunks = [chunk_prefix + chunk for chunk in text_chunks]
 
                 # Generate embeddings and metadata for each chunk
-                documents = []
-                metadatas = []
-                ids = []
-                embeddings = []
-
-                # 1 metadata / document / id object per chunk
-                for i in range(0, len(text_chunks)):
-                    documents.append(record_data["warc_filename"])
-                    ids.append(f"{record_data['warc_record_id']}-{i+1}")
-
-                    metadata = dict(record_data)
-                    metadata["warc_record_text"] = text_chunks[i][len(chunk_prefix) :]  # noqa
-                    metadatas.append(metadata)
-
-                # 1 embedding per chunk
-                embeddings = embedding_model.encode(
+                (
+                    documents,
+                    ids,
+                    metadatas,
+                    embeddings,
+                    multi_chunk_mode,
+                    encoding_timings
+                ) = chunk_objects(
+                    record_data,
                     text_chunks,
-                    normalize_embeddings=normalize_embeddings,
-                ).tolist()
-
+                    embedding_model,
+                    multi_chunk_mode,
+                    encoding_timings,
+                    batch_size
+                )
                 total_embeddings += len(embeddings)
 
                 # Store embeddings and metadata
@@ -218,3 +228,65 @@ def ingest() -> None:
                 )
 
     click.echo(f"Total: {total_embeddings} embeddings from {total_records} HTML/PDF records.")
+
+
+def chunk_objects(
+    record_data: dict,
+    text_chunks: list[str],
+    embedding_model: SentenceTransformer,
+    multi_chunk_mode: bool,
+    encoding_timings: list[float],
+    batch_size: int
+):
+    """
+    Return one document, metadata, id, and embedding object per chunk; also return
+    control variables multi_chunk_mode and encoding_timings
+
+    """
+    environ = os.environ
+    normalize_embeddings = environ["VECTOR_SEARCH_NORMALIZE_EMBEDDINGS"] == "true"
+    chunk_prefix = environ["VECTOR_SEARCH_CHUNK_PREFIX"]
+
+    chunk_range = range(len(text_chunks))
+
+    documents = [record_data["warc_filename"] for _ in chunk_range]
+
+    ids = [f"{record_data['warc_record_id']}-{i+1}" for i in chunk_range]
+
+    metadatas = [
+        dict(record_data, **{"warc_record_text": text_chunks[i][len(chunk_prefix):]})
+        for i in chunk_range
+    ]
+
+    # In some contexts, passing all the text chunks to embedding_model.encode() at once
+    # takes advantage of parallelization, so we default to that, but stop doing it if
+    # it is too slow.
+    if multi_chunk_mode:
+        start = perf_counter()
+        embeddings = embedding_model.encode(
+            text_chunks,
+            batch_size=batch_size,
+            normalize_embeddings=normalize_embeddings,
+        ).tolist()
+        encoding_time = perf_counter() - start
+
+        if len(text_chunks) == 1:
+            encoding_timings.append(encoding_time)
+        else:
+            if len(encoding_timings) == 0:
+                pass
+            elif encoding_time > len(text_chunks) * mean(encoding_timings):
+                multi_chunk_mode = False
+                click.echo("Leaving multi-chunk mode")
+    else:
+        # we've left multi-chunk mode, and there's no need to capture timings anymore
+        embeddings = [
+            embedding_model.encode(
+                [chunk],
+                batch_size=1,
+                normalize_embeddings=normalize_embeddings,
+            ).tolist()[0]
+            for chunk in text_chunks
+        ]
+
+    return documents, ids, metadatas, embeddings, multi_chunk_mode, encoding_timings
