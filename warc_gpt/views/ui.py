@@ -15,16 +15,18 @@ def get_root():
     available_models = list_available_models()
     default_model = ""
 
-    #
-    # Select default model
-    #
+    # Pick a default model
     if "openai/gpt-4-turbo-preview" in available_models:
         default_model = "openai/gpt-4-turbo-preview"
 
     if not default_model:
         for model in available_models:
-            if model.startswith("ollama/mixtral"):
+            if model.startswith(("ollama/mixtral", "ollama/mistral")):
                 default_model = model
+                break
+
+    if not default_model:
+        default_model = available_models[0]
 
     app_consts = {
         "available_models": available_models,
