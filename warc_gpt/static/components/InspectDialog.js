@@ -58,7 +58,6 @@ export class InspectDialog extends HTMLElement {
       console.log(output);
     }
 
-
   };
 
   /**
