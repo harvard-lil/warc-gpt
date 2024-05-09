@@ -32,6 +32,8 @@ warcio = "^1.7.4"
 [tool.poetry.group.dev.dependencies]
 black = "^24.3.0"
 flake8 = "^6.1.0"
+pytest = "^8.1.1"
+pytest-dotenv = "^0.5.2"
 
 [build-system]
 build-backend = "poetry.core.masonry.api"
@@ -39,3 +41,9 @@ requires = ["poetry-core"]
 
 [tool.black]
 line-length = 100
+
+[tool.pytest.ini_options]
+env_override_existing_values = 1
+env_files = [
+    "tests/.test.env"
+]
