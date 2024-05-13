@@ -1,7 +1,7 @@
 version: 2
 updates:
   - package-ecosystem: "pip"
-    target-branch: "main"
+    target-branch: "dependabot"
     directory: "/"
     schedule:
       interval: "daily"
