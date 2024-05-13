@@ -1,13 +1,13 @@
 """
 `warc_gpt` module: REST API and CLI commands for the `warc-gpt` pipeline.
 """
+
 import os
 
 from dotenv import load_dotenv
 from flask import Flask
 
 from warc_gpt import utils
-
 
 load_dotenv()
 
