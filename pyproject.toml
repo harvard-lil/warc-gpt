@@ -4,7 +4,7 @@ description = "WARC + RAG + LLM. Experimental pipeline using retrieval augmented
 license = "MIT"
 name = "warc-gpt"
 readme = "README.md"
-version = "0.1.3"
+version = "0.1.4"
 
 [tool.poetry.dependencies]
 beautifulsoup4 = "^4.12.2"
