@@ -862,13 +862,13 @@ dotenv = ["python-dotenv"]
 
 [[package]]
 name = "flask-limiter"
-version = "3.6.0"
+version = "3.7.0"
 description = "Rate limiting for flask applications"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "Flask_Limiter-3.6.0-py3-none-any.whl", hash = "sha256:ff6738f39ba6a04ce2bd80d29836ed7943eb565acccd61007ffe8e6b1fb7a36d"},
-    {file = "flask_limiter-3.6.0.tar.gz", hash = "sha256:89e663cc8372fa5de5d6f965c5224720c2db5345668961a7076f15666e3213fb"},
+    {file = "Flask_Limiter-3.7.0-py3-none-any.whl", hash = "sha256:4318382f17ecb09848bc6d0f7bc4bb1bf89bcf162200bf47b7b969126693bfda"},
+    {file = "flask_limiter-3.7.0.tar.gz", hash = "sha256:e474462505f6dd0d776db16c46092e9a065ebcb30b10aed0caf54c6b9a4a471a"},
 ]
 
 [package.dependencies]
@@ -4702,4 +4702,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "fe933dddea8ef2396c5fb94633a0cde83a82f3f5a9bc5267dad074c4a4b3558f"
+content-hash = "68d55f6819feafa676252b9a4e7b6782aa17cbae11b45b96a4b06f7e5d90cb5c"
