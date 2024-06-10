@@ -16,8 +16,8 @@ def get_root():
     default_model = ""
 
     # Pick a default model
-    if "openai/gpt-4-turbo" in available_models:
-        default_model = "openai/gpt-4-turbo"
+    if "openai/gpt-4o" in available_models:
+        default_model = "openai/gpt-4o"
 
     if not default_model:
         for model in available_models:
