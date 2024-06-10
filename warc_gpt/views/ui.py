@@ -25,8 +25,14 @@ def get_root():
                 default_model = model
                 break
 
-    if not default_model:
+    if not default_model and available_models:
         default_model = available_models[0]
+
+    if not default_model:
+        return (
+            "ERROR: No models available. Check your environment configuration in your .env file.",
+            500,
+        )
 
     app_consts = {
         "available_models": available_models,

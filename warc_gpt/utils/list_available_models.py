@@ -45,4 +45,7 @@ def list_available_models() -> list:
             current_app.logger.error("Could not list Ollama models.")
             current_app.logger.debug(traceback.format_exc())
 
+    if not models:
+        current_app.logger.warning("No models found, returning empty list.")
+
     return models
