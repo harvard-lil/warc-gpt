@@ -40,7 +40,28 @@ class VectorStorage(ABC):
 
     @classmethod
     def make_storage(cls, name, *args, **kwargs):
-        for sc in cls.__subclasses__():
-            if sc.__name__.lower() == name.lower():
-                return sc(*args, **kwargs)
-        raise ValueError("Vector storage implemementation not found.")
+        """
+        Factory method to create an instance of a subclass based on the provided name.
+
+        Args:
+            name (str): The name of the subclass to instantiate.
+            *args: Variable length argument list for the subclass constructor.
+            **kwargs: Arbitrary keyword arguments for the subclass constructor.
+
+        Returns:
+            An instance of the subclass corresponding to the provided name.
+
+        Raises:
+            ValueError: If no subclass with the provided name is found.
+        """
+        subclasses = {sc.__name__.lower(): sc for sc in cls.__subclasses__()}
+
+        subclass = subclasses.get(name.lower())
+
+        if subclass is not None:
+            return subclass(*args, **kwargs)
+        else:
+            raise ValueError(
+                f"Vector storage '{name}' not found. "
+                f"Available storage options are: {', '.join(subclasses.keys())}"
+            )
