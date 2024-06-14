@@ -28,6 +28,7 @@ scikit-learn = "^1.5.0"
 sentence-transformers = "^3.0.1"
 torch = "^2.3.1"
 warcio = "^1.7.4"
+qdrant-client = "^1.9.1"
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.3.0"
