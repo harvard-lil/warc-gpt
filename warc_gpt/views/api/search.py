@@ -1,19 +1,19 @@
 import os
+from os import environ
 import traceback
 
-import chromadb
 from sentence_transformers import SentenceTransformer
 from flask import current_app, jsonify, request
 
 from warc_gpt import WARC_RECORD_DATA
 from warc_gpt.utils import get_limiter
+from warc_gpt.utils.vector_storage import VectorStorage
 
 API_SEARCH_RATE_LIMIT = os.environ["API_SEARCH_RATE_LIMIT"]
 
 vector_store_cache = {
-    "chroma_client": None,
+    "vector_storage": None,
     "embedding_model": None,
-    "chroma_collection": None,
 }
 """ Module-level "caching" for vector store connection. """
 
@@ -29,10 +29,8 @@ def post_search():
 
     Returns a JSON object of WARC_RECORD_DATA entries.
     """
-    environ = os.environ
 
-    chroma_client = None
-    chroma_collection = None
+    vector_storage = None
     embedding_model = None
 
     input = request.get_json()
@@ -76,34 +74,16 @@ def post_search():
 
     # Chroma client
     try:
-        if vector_store_cache.get("chroma_client", None) is None:
-            chroma_client = chromadb.PersistentClient(
-                path=environ["VECTOR_SEARCH_PATH"],
-                settings=chromadb.Settings(anonymized_telemetry=False),
-            )
-            vector_store_cache["chroma_client"] = chroma_client
+        if vector_store_cache.get("vector_storage", None) is None:
+            vector_storage = VectorStorage.make_storage(environ["VECTOR_SEARCH_DATABASE"])
+            vector_store_cache["vector_storage"] = vector_storage
         else:
-            chroma_client = vector_store_cache["chroma_client"]
+            vector_storage = vector_store_cache["vector_storage"]
 
-        assert chroma_client
+        assert vector_storage
     except Exception:
         current_app.logger.debug(traceback.format_exc())
-        return jsonify({"error": "Could not load ChromaDB client."}), 500
-
-    # Chroma collection
-    try:
-        if vector_store_cache.get("chroma_collection", None) is None:
-            chroma_collection = chroma_client.get_collection(
-                name=environ["VECTOR_SEARCH_COLLECTION_NAME"],
-            )
-            vector_store_cache["chroma_collection"] = chroma_collection
-        else:
-            chroma_collection = vector_store_cache["chroma_collection"]
-
-        assert chroma_collection
-    except Exception:
-        current_app.logger.debug(traceback.format_exc())
-        return jsonify({"error": "Could not load ChromaDB collection."}), 500
+        return jsonify({"error": "Could not load vector storage."}), 500
 
     #
     # Retrieve context chunks
@@ -114,19 +94,19 @@ def post_search():
             normalize_embeddings=normalize_embeddings,
         ).tolist()
 
-        vector_search_results = chroma_collection.query(
-            query_embeddings=message_embedding,
-            n_results=int(environ["VECTOR_SEARCH_SEARCH_N_RESULTS"]),
+        vector_search_results = vector_storage.search(
+            query_embedding=message_embedding,
+            limit=int(environ["VECTOR_SEARCH_SEARCH_N_RESULTS"]),
         )
+
     except Exception:
         current_app.logger.debug(traceback.format_exc())
         return jsonify({"error": "Could not retrieve context from vector store."}), 500
-
     #
     # Filter and return metadata
     #
     if vector_search_results:
-        for vector in vector_search_results["metadatas"][0]:
+        for vector in vector_search_results["metadatas"]:
             metadata = {}
 
             for key in WARC_RECORD_DATA.keys():

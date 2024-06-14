@@ -1,16 +1,17 @@
 """
 `commands.visualize` module: Controller for the `visualize` CLI command.
 """
+
 import os
 from textwrap import wrap
 
 import click
-import chromadb
 import pandas as pd
 from sklearn.manifold import TSNE
 import plotly.express as px
 from sentence_transformers import SentenceTransformer
 from flask import current_app
+from warc_gpt.utils.vector_storage import VectorStorage
 
 
 @current_app.cli.command("visualize")
@@ -26,7 +27,7 @@ from flask import current_app
     default=30.0,
     type=float,
     help="TSNE default setting; reduce for small input sets.",
-    show_default=True
+    show_default=True,
 )
 def visualize(questions: str, perplexity: float) -> None:
     """
@@ -51,15 +52,10 @@ def visualize(questions: str, perplexity: float) -> None:
     )
 
     # Init vector store
-    chroma_client = chromadb.PersistentClient(
-        path=environ["VECTOR_SEARCH_PATH"],
-        settings=chromadb.Settings(anonymized_telemetry=False),
-    )
-
-    chroma_collection = chroma_client.get_collection(name=environ["VECTOR_SEARCH_COLLECTION_NAME"])
+    vector_storage = VectorStorage.make_storage(environ["VECTOR_SEARCH_DATABASE"])
 
     # Pull everything out of the vector store
-    all_vectors = chroma_collection.get(include=["metadatas", "documents", "embeddings"])
+    all_vectors = vector_storage.get_all()
 
     #
     # If a question was provided, generate embeddings for it so it can be placed on the plot
@@ -83,8 +79,10 @@ def visualize(questions: str, perplexity: float) -> None:
     try:
         scatter_plot_data = TSNE(perplexity=perplexity).fit_transform(scatter_plot_data)
     except ValueError as e:
-        if f'{e}' == "perplexity must be less than n_samples":
-            click.echo("You may not have enough input data; add some or reduce perplexity to less than n_samples.")  # noqa
+        if f"{e}" == "perplexity must be less than n_samples":
+            click.echo(
+                "You may not have enough input data; add some or reduce perplexity to less than n_samples."
+            )  # noqa
             return 1
         else:
             raise
