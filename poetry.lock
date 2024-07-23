@@ -852,18 +852,18 @@ dotenv = ["python-dotenv"]
 
 [[package]]
 name = "flask-limiter"
-version = "3.7.0"
+version = "3.8.0"
 description = "Rate limiting for flask applications"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "Flask_Limiter-3.7.0-py3-none-any.whl", hash = "sha256:4318382f17ecb09848bc6d0f7bc4bb1bf89bcf162200bf47b7b969126693bfda"},
-    {file = "flask_limiter-3.7.0.tar.gz", hash = "sha256:e474462505f6dd0d776db16c46092e9a065ebcb30b10aed0caf54c6b9a4a471a"},
+    {file = "Flask_Limiter-3.8.0-py3-none-any.whl", hash = "sha256:0ab44f586d8cc349412791711b6cbafe8f86e7b60ad9e8f24f2686009f00900e"},
+    {file = "flask_limiter-3.8.0.tar.gz", hash = "sha256:686f8b4a75404e47b91565a795c70d29f69c145f6907f1f32522e962b134dada"},
 ]
 
 [package.dependencies]
 Flask = ">=2"
-limits = ">=2.8"
+limits = ">=3.13"
 ordered-set = ">4,<5"
 rich = ">=12,<14"
 typing-extensions = ">=4"
@@ -1558,13 +1558,13 @@ requests = ">=2,<3"
 
 [[package]]
 name = "limits"
-version = "3.12.0"
+version = "3.13.0"
 description = "Rate limiting utilities"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "limits-3.12.0-py3-none-any.whl", hash = "sha256:48d91e94a0888fb1251aa31423d716ae72ceff997231363f7968a5eaa51dc56d"},
-    {file = "limits-3.12.0.tar.gz", hash = "sha256:95764065715a11b9fdcc82558cac2fb59a1febbb7aa2acd045f72ab0c16ec04f"},
+    {file = "limits-3.13.0-py3-none-any.whl", hash = "sha256:9767f7233da4255e9904b79908a728e8ec0984c0b086058b4cbbd309aea553f6"},
+    {file = "limits-3.13.0.tar.gz", hash = "sha256:6571b0c567bfa175a35fed9f8a954c0c92f1c3200804282f1b8f1de4ad98a953"},
 ]
 
 [package.dependencies]
@@ -4624,4 +4624,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "ae793b95c109162e06c4480c7e309b11208ce50fc1ff61fa8250de8661d70a63"
+content-hash = "5f9965bec377c77fb8202273c52a1e6861b442f9e3f86244d00079577ed02fe1"
