@@ -9,7 +9,6 @@ import io
 from shutil import rmtree
 
 import click
-import chromadb
 from bs4 import BeautifulSoup
 from bs4 import Comment as HTMLComment
 from pypdf import PdfReader
@@ -21,6 +20,7 @@ from time import perf_counter
 from statistics import mean
 
 from warc_gpt import WARC_RECORD_DATA
+from warc_gpt.utils.vector_storage import VectorStorage
 
 
 @current_app.cli.command("ingest")
@@ -43,8 +43,7 @@ def ingest(batch_size) -> None:
 
     warc_files = []
     embedding_model = None
-    chroma_client = None
-    chroma_collection = None
+    vector_storage = None
     total_records = 0
     total_embeddings = 0
 
@@ -85,15 +84,7 @@ def ingest(batch_size) -> None:
     )  # Note: The text splitter adjusts its cut-off based on the models' max_seq_length
 
     # Init vector store
-    chroma_client = chromadb.PersistentClient(
-        path=environ["VECTOR_SEARCH_PATH"],
-        settings=chromadb.Settings(anonymized_telemetry=False),
-    )
-
-    chroma_collection = chroma_client.create_collection(
-        name=environ["VECTOR_SEARCH_COLLECTION_NAME"],
-        metadata={"hnsw:space": environ["VECTOR_SEARCH_DISTANCE_FUNCTION"]},
-    )
+    vector_storage = VectorStorage.make_storage(environ["VECTOR_SEARCH_DATABASE"])
 
     #
     # For each WARC:
@@ -202,25 +193,20 @@ def ingest(batch_size) -> None:
                 text_chunks = [chunk_prefix + chunk for chunk in text_chunks]
 
                 # Generate embeddings and metadata for each chunk
-                (
-                    documents,
-                    ids,
-                    metadatas,
-                    embeddings,
-                    multi_chunk_mode,
-                    encoding_timings
-                ) = chunk_objects(
-                    record_data,
-                    text_chunks,
-                    embedding_model,
-                    multi_chunk_mode,
-                    encoding_timings,
-                    batch_size
+                (documents, ids, metadatas, embeddings, multi_chunk_mode, encoding_timings) = (
+                    chunk_objects(
+                        record_data,
+                        text_chunks,
+                        embedding_model,
+                        multi_chunk_mode,
+                        encoding_timings,
+                        batch_size,
+                    )
                 )
                 total_embeddings += len(embeddings)
 
                 # Store embeddings and metadata
-                chroma_collection.add(
+                vector_storage.add(
                     documents=documents,
                     embeddings=embeddings,
                     metadatas=metadatas,
@@ -236,7 +222,7 @@ def chunk_objects(
     embedding_model: SentenceTransformer,
     multi_chunk_mode: bool,
     encoding_timings: list[float],
-    batch_size: int
+    batch_size: int,
 ):
     """
     Return one document, metadata, id, and embedding object per chunk; also return
@@ -254,7 +240,7 @@ def chunk_objects(
     ids = [f"{record_data['warc_record_id']}-{i+1}" for i in chunk_range]
 
     metadatas = [
-        dict(record_data, **{"warc_record_text": text_chunks[i][len(chunk_prefix):]})
+        dict(record_data, **{"warc_record_text": text_chunks[i][len(chunk_prefix) :]})
         for i in chunk_range
     ]
 
