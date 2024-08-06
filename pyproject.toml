@@ -31,7 +31,7 @@ warcio = "^1.7.4"
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.3.0"
-flake8 = "^7.1.0"
+flake8 = "^7.1.1"
 
 [build-system]
 build-backend = "poetry.core.masonry.api"
