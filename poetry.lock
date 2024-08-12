@@ -2267,13 +2267,13 @@ sympy = "*"
 
 [[package]]
 name = "openai"
-version = "1.40.0"
+version = "1.40.3"
 description = "The official Python library for the openai API"
 optional = false
 python-versions = ">=3.7.1"
 files = [
-    {file = "openai-1.40.0-py3-none-any.whl", hash = "sha256:eb6909abaacd62ef28c275a5c175af29f607b40645b0a49d2856bbed62edb2e7"},
-    {file = "openai-1.40.0.tar.gz", hash = "sha256:1b7b316e27b2333b063ee62b6539b74267c7282498d9a02fc4ccb38a9c14336c"},
+    {file = "openai-1.40.3-py3-none-any.whl", hash = "sha256:09396cb6e2e15c921a5d872bf92841a60a9425da10dcd962b45fe7c4f48f8395"},
+    {file = "openai-1.40.3.tar.gz", hash = "sha256:f2ffe907618240938c59d7ccc67dd01dc8c50be203c0077240db6758d2f02480"},
 ]
 
 [package.dependencies]
@@ -4654,4 +4654,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "a72f62935e3c20daf6a81338ff7bf7828f6b3780e854d4ffd799410087e8668c"
+content-hash = "c55d107ce2a4fda22a95cb83edfe40da114211949472256b9c97d10329bb1f64"
