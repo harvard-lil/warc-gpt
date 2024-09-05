@@ -26,7 +26,7 @@ python-slugify = "^8.0.1"
 requests = "^2.32.3"
 scikit-learn = "^1.5.1"
 sentence-transformers = "^3.0.1"
-torch = "^2.4.0"
+torch = "^2.4.1"
 warcio = "^1.7.4"
 
 [tool.poetry.group.dev.dependencies]
