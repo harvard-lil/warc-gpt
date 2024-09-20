@@ -1532,25 +1532,25 @@ adal = ["adal (>=1.0.2)"]
 
 [[package]]
 name = "langchain"
-version = "0.2.14"
+version = "0.3.0"
 description = "Building applications with LLMs through composability"
 optional = false
-python-versions = "<4.0,>=3.8.1"
+python-versions = "<4.0,>=3.9"
 files = [
-    {file = "langchain-0.2.14-py3-none-any.whl", hash = "sha256:eed76194ee7d9c081037a3df7868d4de90e0410b51fc1ca933a8379e464bf40c"},
-    {file = "langchain-0.2.14.tar.gz", hash = "sha256:dc2aa5a58882054fb5d043c39ab8332ebd055f88f17839da68e1c7fd0a4fefe2"},
+    {file = "langchain-0.3.0-py3-none-any.whl", hash = "sha256:59a75a6a1eb7bfd2a6bf0c7a5816409a8fdc9046187b07af287b23b9899617af"},
+    {file = "langchain-0.3.0.tar.gz", hash = "sha256:a7c23892440bd1f5b9e029ff0dd709dd881ae927c4c0a3210ac64dba9bbf3f7f"},
 ]
 
 [package.dependencies]
 aiohttp = ">=3.8.3,<4.0.0"
-langchain-core = ">=0.2.32,<0.3.0"
-langchain-text-splitters = ">=0.2.0,<0.3.0"
+langchain-core = ">=0.3.0,<0.4.0"
+langchain-text-splitters = ">=0.3.0,<0.4.0"
 langsmith = ">=0.1.17,<0.2.0"
 numpy = [
     {version = ">=1,<2", markers = "python_version < \"3.12\""},
     {version = ">=1.26.0,<2.0.0", markers = "python_version >= \"3.12\""},
 ]
-pydantic = ">=1,<3"
+pydantic = ">=2.7.4,<3.0.0"
 PyYAML = ">=5.3"
 requests = ">=2,<3"
 SQLAlchemy = ">=1.4,<3"
@@ -1558,21 +1558,21 @@ tenacity = ">=8.1.0,<8.4.0 || >8.4.0,<9.0.0"
 
 [[package]]
 name = "langchain-core"
-version = "0.2.32"
+version = "0.3.2"
 description = "Building applications with LLMs through composability"
 optional = false
-python-versions = "<4.0,>=3.8.1"
+python-versions = "<4.0,>=3.9"
 files = [
-    {file = "langchain_core-0.2.32-py3-none-any.whl", hash = "sha256:1f5584cf0034909e35ea17010a847d4079417e0ddcb5a9eb3fbb2bd55f3268c0"},
-    {file = "langchain_core-0.2.32.tar.gz", hash = "sha256:d82cdc350bbbe74261330d87056b7d9f1fb567828e9e03f708d23a48b941819e"},
+    {file = "langchain_core-0.3.2-py3-none-any.whl", hash = "sha256:23616795c7667cfd2c915e2ddc42eebeb162352a749623c1b22721c01c040036"},
+    {file = "langchain_core-0.3.2.tar.gz", hash = "sha256:92bbf67c6e4104c132de1150a753a458bb46e81aae6a4bc2ead91a5d3ccdd528"},
 ]
 
 [package.dependencies]
 jsonpatch = ">=1.33,<2.0"
-langsmith = ">=0.1.75,<0.2.0"
+langsmith = ">=0.1.117,<0.2.0"
 packaging = ">=23.2,<25"
 pydantic = [
-    {version = ">=1,<3", markers = "python_full_version < \"3.12.4\""},
+    {version = ">=2.5.2,<3.0.0", markers = "python_full_version < \"3.12.4\""},
     {version = ">=2.7.4,<3.0.0", markers = "python_full_version >= \"3.12.4\""},
 ]
 PyYAML = ">=5.3"
@@ -1581,35 +1581,36 @@ typing-extensions = ">=4.7"
 
 [[package]]
 name = "langchain-text-splitters"
-version = "0.2.0"
+version = "0.3.0"
 description = "LangChain text splitting utilities"
 optional = false
-python-versions = "<4.0,>=3.8.1"
+python-versions = "<4.0,>=3.9"
 files = [
-    {file = "langchain_text_splitters-0.2.0-py3-none-any.whl", hash = "sha256:7b4c6a45f8471630a882b321e138329b6897102a5bc62f4c12be1c0b05bb9199"},
-    {file = "langchain_text_splitters-0.2.0.tar.gz", hash = "sha256:b32ab4f7397f7d42c1fa3283fefc2547ba356bd63a68ee9092865e5ad83c82f9"},
+    {file = "langchain_text_splitters-0.3.0-py3-none-any.whl", hash = "sha256:e84243e45eaff16e5b776cd9c81b6d07c55c010ebcb1965deb3d1792b7358e83"},
+    {file = "langchain_text_splitters-0.3.0.tar.gz", hash = "sha256:f9fe0b4d244db1d6de211e7343d4abc4aa90295aa22e1f0c89e51f33c55cd7ce"},
 ]
 
 [package.dependencies]
-langchain-core = ">=0.2.0,<0.3.0"
-
-[package.extras]
-extended-testing = ["beautifulsoup4 (>=4.12.3,<5.0.0)", "lxml (>=4.9.3,<6.0)"]
+langchain-core = ">=0.3.0,<0.4.0"
 
 [[package]]
 name = "langsmith"
-version = "0.1.77"
+version = "0.1.125"
 description = "Client library to connect to the LangSmith LLM Tracing and Evaluation Platform."
 optional = false
 python-versions = "<4.0,>=3.8.1"
 files = [
-    {file = "langsmith-0.1.77-py3-none-any.whl", hash = "sha256:2202cc21b1ed7e7b9e5d2af2694be28898afa048c09fdf09f620cbd9301755ae"},
-    {file = "langsmith-0.1.77.tar.gz", hash = "sha256:4ace09077a9a4e412afeb4b517ca68e7de7b07f36e4792dc8236ac5207c0c0c7"},
+    {file = "langsmith-0.1.125-py3-none-any.whl", hash = "sha256:74ce8eb2663e1ed20bfcfc88d41e0712879306956c9938d1cdbab7d60458bdca"},
+    {file = "langsmith-0.1.125.tar.gz", hash = "sha256:2c0eb0c3cbf22cff55bf519b8e889041f9a591bcf97af5152c8e130333c5940e"},
 ]
 
 [package.dependencies]
+httpx = ">=0.23.0,<1"
 orjson = ">=3.9.14,<4.0.0"
-pydantic = ">=1,<3"
+pydantic = [
+    {version = ">=1,<3", markers = "python_full_version < \"3.12.4\""},
+    {version = ">=2.7.4,<3.0.0", markers = "python_full_version >= \"3.12.4\""},
+]
 requests = ">=2,<3"
 
 [[package]]
@@ -4650,4 +4651,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "586acaf86db8c74ccef32dcc3eb92b902cd88e3abdd858a297b757156b3ad73a"
+content-hash = "2fb12a2150069a9443f23f754394358ee3d90a0a705bcf65db33136355c22fd3"
