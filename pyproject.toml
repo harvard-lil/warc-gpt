@@ -9,7 +9,7 @@ version = "0.1.7"
 [tool.poetry.dependencies]
 beautifulsoup4 = "^4.12.2"
 brotlipy = "^0.7.0"
-chromadb = "^0.5.5"
+chromadb = "^0.5.7"
 click = "^8.1.7"
 flask = "^3.0.0"
 flask-limiter = "^3.8.0"
