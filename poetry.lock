@@ -2970,13 +2970,13 @@ windows-terminal = ["colorama (>=0.4.6)"]
 
 [[package]]
 name = "pypdf"
-version = "4.3.1"
+version = "5.0.0"
 description = "A pure-python PDF library capable of splitting, merging, cropping, and transforming PDF files"
 optional = false
 python-versions = ">=3.6"
 files = [
-    {file = "pypdf-4.3.1-py3-none-any.whl", hash = "sha256:64b31da97eda0771ef22edb1bfecd5deee4b72c3d1736b7df2689805076d6418"},
-    {file = "pypdf-4.3.1.tar.gz", hash = "sha256:b2f37fe9a3030aa97ca86067a56ba3f9d3565f9a791b305c7355d8392c30d91b"},
+    {file = "pypdf-5.0.0-py3-none-any.whl", hash = "sha256:67603e2e96cdf70e676564520933c017d450f16075b9966be5fee128812ace8c"},
+    {file = "pypdf-5.0.0.tar.gz", hash = "sha256:5c536ec0f7af8e2f80eb32806964652a562b9abc5477b3c195e2b842725ce55b"},
 ]
 
 [package.extras]
@@ -4651,4 +4651,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "797d2455490167cf845523b03fb9d3f574e99276c177db81a989addb841e5607"
+content-hash = "08ab49ea1d626eeb3d6b449bcb51e6e0a1cb6bf076f44f751bb95d2e0d0a0db7"
