@@ -3518,27 +3518,26 @@ test = ["array-api-strict", "asv", "gmpy2", "hypothesis (>=6.30)", "mpmath", "po
 
 [[package]]
 name = "sentence-transformers"
-version = "3.0.1"
-description = "Multilingual text embeddings"
+version = "3.1.1"
+description = "State-of-the-Art Text Embeddings"
 optional = false
-python-versions = ">=3.8.0"
+python-versions = ">=3.8"
 files = [
-    {file = "sentence_transformers-3.0.1-py3-none-any.whl", hash = "sha256:01050cc4053c49b9f5b78f6980b5a72db3fd3a0abb9169b1792ac83875505ee6"},
-    {file = "sentence_transformers-3.0.1.tar.gz", hash = "sha256:8a3d2c537cc4d1014ccc20ac92be3d6135420a3bc60ae29a3a8a9b4bb35fbff6"},
+    {file = "sentence_transformers-3.1.1-py3-none-any.whl", hash = "sha256:c73bf6f17e3676bb9372a6133a254ebfb5907586b470f2bac5a840c64c3cf97e"},
+    {file = "sentence_transformers-3.1.1.tar.gz", hash = "sha256:8f00020ef4ad6b918475c38af545c22f61403b67eb22d994860bab06902db160"},
 ]
 
 [package.dependencies]
-huggingface-hub = ">=0.15.1"
-numpy = "*"
+huggingface-hub = ">=0.19.3"
 Pillow = "*"
 scikit-learn = "*"
 scipy = "*"
 torch = ">=1.11.0"
 tqdm = "*"
-transformers = ">=4.34.0,<5.0.0"
+transformers = ">=4.38.0,<5.0.0"
 
 [package.extras]
-dev = ["accelerate (>=0.20.3)", "datasets", "pre-commit", "pytest", "ruff (>=0.3.0)"]
+dev = ["accelerate (>=0.20.3)", "datasets", "pre-commit", "pytest", "pytest-cov"]
 train = ["accelerate (>=0.20.3)", "datasets"]
 
 [[package]]
@@ -4651,4 +4650,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "797d2455490167cf845523b03fb9d3f574e99276c177db81a989addb841e5607"
+content-hash = "9890fb7129b3d0c3b2117c7b8912d676327f6c5fed3a68b81029d38b5f3acc8e"
