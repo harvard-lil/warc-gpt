@@ -40,13 +40,29 @@ WARC-GPT requires the following machine-level dependencies to be installed.
 - [Python 3.11+](https://python.org)
 - [Python Poetry](https://python-poetry.org/)
 
-Use the following commands to clone the project and instal its dependencies:
+Use the following commands to clone the project and install its dependencies:
 
 ```bash
 git clone https://github.com/harvard-lil/warc-gpt.git
+cd warc-gpt
 poetry env use 3.11
 poetry install
 ```
+
+If you don't want to use Poetry, or are in some context where that
+doesn't work, you can clone the repo, create a virtual environment,
+and install the dependencies like this:
+
+```bash
+git clone https://github.com/harvard-lil/warc-gpt.git
+cd warc-gpt
+python3 -m venv env
+. env/bin/activate
+pip install .
+```
+
+If you choose this method, remove the prefix `poetry run ` from the
+commands below.
 
 [☝️ Summary](#summary)
 
