@@ -174,10 +174,13 @@ def ingest(batch_size) -> None:
                 #
                 if record_data["warc_record_content_type"].startswith("application/pdf"):
                     raw = io.BytesIO(record.raw_stream.read())
-                    pdf = PdfReader(raw)
-
-                    for page in pdf.pages:
-                        record_data["warc_record_text"] += page.extract_text()
+                    try:
+                        pdf = PdfReader(raw)
+                        for page in pdf.pages:
+                            record_data["warc_record_text"] += page.extract_text()
+                    except Exception as exc:
+                        print(f"- Could not extract text from {record_data['warc_record_target_uri']}")
+                        continue
 
                 #
                 # Stop here if we don't have text, or text contains less than 5 words
