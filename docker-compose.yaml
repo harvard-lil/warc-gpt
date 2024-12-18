@@ -4,7 +4,7 @@ services:
     env_file: .env
     build: .
     ports:
-      - "5000:5000"
+      - "9999:5000"
     restart: always
     environment:
       OLLAMA_API_URL: ${OLLAMA_API_URL}
@@ -13,3 +13,7 @@ services:
       WARC_FOLDER_PATH: ${WARC_FOLDER_PATH}
       VISUALIZATIONS_FOLDER_PATH: ${VISUALIZATIONS_FOLDER_PATH}
       VECTOR_SEARCH_PATH: ${VECTOR_SEARCH_PATH}
+    volumes:
+      - "${WARC_FOLDER_PATH}:/warc"
+      - "${VECTOR_SEARCH_PATH}:/chromadb"
+      - "${VISUALIZATIONS_FOLDER_PATH}:/visualizations"

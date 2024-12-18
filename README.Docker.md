@@ -18,5 +18,11 @@ Then, push it to your registry, e.g. `docker push myregistry.com/myapp`.
 Consult Docker's [getting started](https://docs.docker.com/go/get-started-sharing/)
 docs for more detail on building and pushing.
 
+### Executing Ingestion and Visualization Commands
+
+ingest: `docker exec -it warc-gpt poetry run flask ingest`
+
+visualize: `docker exec -it warc-gpt poetry run flask visualize`
+
 ### References
 * [Docker's Python guide](https://docs.docker.com/language/python/)
