@@ -4,7 +4,7 @@ services:
     env_file: .env
     build: .
     ports:
-      - "9999:5000"
+      - "5000:5000"
     restart: always
     environment:
       OLLAMA_API_URL: ${OLLAMA_API_URL}
