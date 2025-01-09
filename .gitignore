@@ -11,3 +11,9 @@ TODO.md
 runs/
 _*/
 env/
+/.idea/.gitignore
+/.idea/aws.xml
+/.idea/misc.xml
+/.idea/modules.xml
+/.idea/vcs.xml
+/.idea/warc-gpt-public.iml
